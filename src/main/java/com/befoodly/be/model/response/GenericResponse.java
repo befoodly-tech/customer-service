@@ -10,7 +10,7 @@ import java.util.Optional;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Builder
 public class GenericResponse<T> {
-    Optional<T> data;
+    T data;
     Integer statusCode;
     String errorMessage;
 }
