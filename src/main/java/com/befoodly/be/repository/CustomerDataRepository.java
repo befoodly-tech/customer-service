@@ -10,4 +10,6 @@ import java.util.Optional;
 public interface CustomerDataRepository extends JpaRepository<CustomerEntity, Long> {
 
     Optional<CustomerEntity> findByPhoneNumber(String phoneNumber);
+
+    Optional<CustomerEntity> findByReferenceId(String customerReferenceId);
 }

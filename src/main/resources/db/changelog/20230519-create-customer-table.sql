@@ -14,5 +14,5 @@ CREATE TABLE customer_data (
    created_at TIMESTAMP WITHOUT TIME ZONE,
    updated_at TIMESTAMP WITHOUT TIME ZONE,
    version INTEGER,
-   CONSTRAINT pk_demo PRIMARY KEY (id)
+   CONSTRAINT pk_customer_data PRIMARY KEY (id)
 );

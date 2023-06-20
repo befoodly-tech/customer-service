@@ -6,5 +6,6 @@ import com.befoodly.be.model.request.CustomerEditRequest;
 
 public interface CustomerService {
     String createCustomer(CustomerCreateRequest request);
-    CustomerEntity editCustomerDetails(String phoneNumber, CustomerEditRequest request);
+    CustomerEntity editCustomerDetails(String customerReferenceId, CustomerEditRequest request);
+    CustomerEntity fetchCustomerDetails(String customerReferenceId);
 }

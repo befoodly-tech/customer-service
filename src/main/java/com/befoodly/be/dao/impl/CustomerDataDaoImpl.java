@@ -25,6 +25,21 @@ public class CustomerDataDaoImpl implements CustomerDataDao {
 
         Optional<CustomerEntity> customer = customerDataRepository.findByPhoneNumber(phoneNumber);
 
+        if (customer.isEmpty()) {
+            return null;
+        }
+
+        return customer.get();
+    }
+
+    @Override
+    public CustomerEntity findCustomerByReferenceId(String customerReferenceId) {
+        Optional<CustomerEntity> customer = customerDataRepository.findByReferenceId(customerReferenceId);
+
+        if (customer.isEmpty()) {
+            return null;
+        }
+
         return customer.get();
     }
 }
