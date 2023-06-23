@@ -11,6 +11,7 @@ import com.befoodly.be.service.AddressService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -40,6 +41,7 @@ public class AddressServiceImpl implements AddressService {
                         .title(request.getTitle())
                         .phoneNumber(request.getPhoneNumber())
                         .addressFirst(request.getAddressFirst())
+                        .addressSecond(StringUtils.isNotEmpty(request.getAddressSecond()) ? request.getAddressSecond() : "")
                         .pinCode(request.getPinCode())
                         .city(request.getCity())
                         .state(request.getState())
@@ -63,6 +65,60 @@ public class AddressServiceImpl implements AddressService {
 
         } catch(Exception e) {
             log.error("received following error message:{} while adding address for customerId:{}", e.getMessage(), customerReferenceId);
+            throw e;
+        }
+    }
+
+    @Override
+    public AddressEntity editAddress(String customerReferenceId, String title, AddressCreateRequest request) {
+
+        try {
+            if (isCustomerExist(customerReferenceId)) {
+                Optional<AddressEntity> address = addressDataDao.findAddressByCustomerIdAndTitle(customerReferenceId, title);
+
+                if (address.isEmpty()) {
+                    log.info("Address not found for title: {}, customerId: {}", title, customerReferenceId);
+
+                    throw new InvalidException("Address with title not found for customer!");
+                }
+
+                AddressEntity currentAddress = address.get();
+                currentAddress.setTitle(request.getTitle());
+                currentAddress.setPhoneNumber(request.getPhoneNumber());
+                currentAddress.setAddressFirst(request.getAddressFirst());
+                currentAddress.setAddressSecond(request.getAddressSecond());
+                currentAddress.setPinCode(request.getPinCode());
+                currentAddress.setCity(request.getCity());
+                currentAddress.setState(request.getState());
+
+                addressDataDao.save(currentAddress);
+                log.info("successfully updated the address for customerId:{}", customerReferenceId);
+
+                return currentAddress;
+            }
+
+            log.info("Customer with reference id: {} is not found", customerReferenceId);
+
+            throw new InvalidException("Customer does not exist!");
+        } catch(Exception e) {
+            log.error("received an error message:{} while editing the address for customer id:{}", e.getMessage(), customerReferenceId);
+            throw e;
+        }
+    }
+
+    @Override
+    public void deleteAddress(String customerReferenceId, String title) {
+        try {
+            if (isCustomerExist(customerReferenceId)) {
+                addressDataDao.deleteAddress(customerReferenceId, title);
+                log.info("successfully deleted the address with title: {} for customer Id:{}", title, customerReferenceId);
+
+                return;
+            }
+
+            throw new InvalidException("Customer doesn't exist!");
+        } catch (Exception e) {
+            log.error("received error: {} while deleting the address for customerId: {} with title: {}", e.getMessage(), customerReferenceId, title);
             throw e;
         }
     }
