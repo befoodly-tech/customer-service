@@ -1,0 +1,11 @@
+package com.befoodly.be.service;
+
+import com.befoodly.be.model.request.ProductCreateRequest;
+import com.befoodly.be.model.response.ProductDataResponse;
+
+import java.util.List;
+
+public interface ProductService {
+    void createNewProduct(ProductCreateRequest request);
+    List<ProductDataResponse> fetchAllActiveProducts();
+}

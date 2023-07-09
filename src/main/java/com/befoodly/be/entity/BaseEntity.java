@@ -20,18 +20,14 @@ public abstract class BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(updatable = false, nullable = false)
-    @JsonIgnore
     private Long id;
 
     @CreationTimestamp
-    @JsonIgnore
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
-    @JsonIgnore
     private LocalDateTime updatedAt;
 
     @Version
-    @JsonIgnore
     private Integer version;
 }

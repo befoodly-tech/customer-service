@@ -12,7 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/v1")
+@RequestMapping("/v1/customer")
 @RequiredArgsConstructor
 public class CustomerController {
 
@@ -40,7 +40,7 @@ public class CustomerController {
                 .build(), HttpStatus.OK);
     }
 
-    @GetMapping(value = "/customer/{customerReferenceId}")
+    @GetMapping(value = "/{customerReferenceId}")
     public ResponseEntity<GenericResponse<CustomerEntity>> getCustomerDetails(@PathVariable(value = "customerReferenceId") String customerReferenceId) {
         CustomerEntity customerData = customerService.fetchCustomerDetails(customerReferenceId);
 
