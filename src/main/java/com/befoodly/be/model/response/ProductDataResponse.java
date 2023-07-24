@@ -1,10 +1,8 @@
 package com.befoodly.be.model.response;
 
-import com.befoodly.be.model.ProductFeedback;
+import com.befoodly.be.model.Feedback;
 import com.befoodly.be.model.ProductProvider;
-import com.befoodly.be.utils.LocalDateTimeDeserializer;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import lombok.Builder;
 import lombok.Data;
 
@@ -23,7 +21,8 @@ public class ProductDataResponse {
     Double price;
     LocalDateTime acceptingTime;
     LocalDateTime deliveryTime;
-    ProductFeedback feedback;
+    Feedback feedback;
+    Long vendorId;
     ProductProvider providerData;
     LocalDateTime createdAt;
     LocalDateTime updatedAt;

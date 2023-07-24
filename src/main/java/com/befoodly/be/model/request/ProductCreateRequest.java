@@ -1,6 +1,6 @@
 package com.befoodly.be.model.request;
 
-import com.befoodly.be.model.ProductFeedback;
+import com.befoodly.be.model.Feedback;
 import com.befoodly.be.model.ProductProvider;
 import com.befoodly.be.utils.LocalDateTimeDeserializer;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -23,6 +23,7 @@ public class ProductCreateRequest {
     LocalDateTime acceptingTime;
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     LocalDateTime deliveryTime;
-    ProductFeedback feedback;
+    Feedback feedback;
+    Long vendorId;
     ProductProvider providerData;
 }

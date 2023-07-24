@@ -2,7 +2,7 @@ package com.befoodly.be.service.impl;
 
 import com.befoodly.be.dao.ProductDataDao;
 import com.befoodly.be.entity.ProductEntity;
-import com.befoodly.be.model.ProductFeedback;
+import com.befoodly.be.model.Feedback;
 import com.befoodly.be.model.ProductProvider;
 import com.befoodly.be.model.enums.ProductStatus;
 import com.befoodly.be.model.request.ProductCreateRequest;
@@ -41,11 +41,12 @@ public class ProductServiceImpl implements ProductService {
                     .deliveryTime(request.getDeliveryTime())
                     .status(ProductStatus.ACTIVE)
                     .feedback(JacksonUtils.objectToString(request.getFeedback()))
+                    .vendorId(request.getVendorId())
                     .providerData(JacksonUtils.objectToString(request.getProviderData()))
                     .build();
 
             productDataDao.save(entity);
-            log.info("successfully created the product for provider with id: {}", request.getProviderData().getProviderId());
+            log.info("successfully created the product for provider with id: {}", getReferenceId);
 
         } catch(Exception e) {
             log.error("failed to create the product with error msg: {}", e.getMessage());
@@ -71,7 +72,8 @@ public class ProductServiceImpl implements ProductService {
                             .orderNo(productEntity.getOrderNo())
                             .acceptingTime(productEntity.getAcceptingTime())
                             .deliveryTime(productEntity.getDeliveryTime())
-                            .feedback(JacksonUtils.stringToObject(productEntity.getFeedback(), ProductFeedback.class))
+                            .feedback(JacksonUtils.stringToObject(productEntity.getFeedback(), Feedback.class))
+                            .vendorId(productEntity.getVendorId())
                             .providerData(JacksonUtils.stringToObject(productEntity.getProviderData(), ProductProvider.class))
                             .createdAt(productEntity.getCreatedAt())
                             .updatedAt(productEntity.getUpdatedAt())
