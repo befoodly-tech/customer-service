@@ -9,7 +9,7 @@ import java.math.BigInteger;
 @Data
 @Builder
 @AllArgsConstructor
-public class ProductFeedback {
+public class Feedback {
 
     Double rating;
 

@@ -14,9 +14,15 @@ CREATE TABLE product_data (
    delivery_time TIMESTAMP NOT NULL,
    status VARCHAR(255),
    feedback VARCHAR(255),
+   vendor_id BIGINT NOT NULL,
    provider_data VARCHAR(255),
    created_at TIMESTAMP WITHOUT TIME ZONE,
    updated_at TIMESTAMP WITHOUT TIME ZONE,
    version INTEGER,
    CONSTRAINT pk_product_data PRIMARY KEY (id)
 );
+
+ALTER TABLE product_data
+    ADD CONSTRAINT fk_product_data
+    FOREIGN KEY (vendor_id)
+    REFERENCES vendor_data(id);

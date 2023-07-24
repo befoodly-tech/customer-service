@@ -11,8 +11,6 @@ import java.math.BigInteger;
 @AllArgsConstructor
 public class ProductProvider {
 
-    BigInteger providerId;
-
     String providerName;
 
     String location;
