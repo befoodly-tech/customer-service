@@ -1,6 +1,6 @@
 package com.befoodly.be.entity;
 
-import com.befoodly.be.model.enums.OrderStatus;
+import com.befoodly.be.model.enums.DeliveryStatus;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -11,28 +11,30 @@ import lombok.experimental.SuperBuilder;
 
 import javax.persistence.*;
 
-@Entity
 @Data
-@SuperBuilder
+@Entity
 @AllArgsConstructor
+@SuperBuilder
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Table(name = "order_history")
-public class OrderEntity extends BaseEntity{
+@Table(name = "delivery_data")
+public class DeliveryEntity extends BaseEntity{
 
     @Column(nullable = false, unique = true)
     String referenceId;
 
     @Column(nullable = false)
-    String customerReferenceId;
+    String name;
 
     @Column(nullable = false)
-    String productList;
+    String phoneNumber;
 
     @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    OrderStatus status;
+    Long orderId;
 
     Double totalCost;
+
+    @Enumerated(EnumType.STRING)
+    DeliveryStatus status;
 }

@@ -1,4 +1,4 @@
-package com.befoodly.be.model.request;
+package com.befoodly.be.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -7,8 +7,7 @@ import lombok.Data;
 @Data
 @Builder
 @AllArgsConstructor
-public class OrderRequest {
-    String customerReferenceId;
+public class ProductList {
     Long productId;
-    Double cost;
+    Integer orderCount;
 }
