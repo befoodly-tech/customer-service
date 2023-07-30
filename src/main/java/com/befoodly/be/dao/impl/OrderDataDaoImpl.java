@@ -22,12 +22,23 @@ public class OrderDataDaoImpl implements OrderDataDao {
     }
 
     @Override
-    public Optional<OrderEntity> findOrderDetails(String customerReferenceId, Long productId) {
-        return orderRepository.findByCustomerReferenceIdAndProductId(customerReferenceId, productId);
+    public List<OrderEntity> findOrderDetails(String customerReferenceId) {
+        return orderRepository.findByCustomerReferenceId(customerReferenceId);
     }
 
     @Override
-    public List<OrderEntity> findAllPendingOrderDetails(String customerReferenceId) {
-        return orderRepository.findByCustomerReferenceIdAndStatus(customerReferenceId, OrderStatus.PENDING);
+    public Optional<OrderEntity> findAllPendingOrderDetails(String customerReferenceId) {
+        List<OrderEntity> pendingOrderList = orderRepository.findByCustomerReferenceIdAndStatus(customerReferenceId, OrderStatus.PENDING);
+
+        if (pendingOrderList.isEmpty()) {
+            return null;
+        }
+
+        return Optional.of(pendingOrderList.get(0));
+    }
+
+    @Override
+    public List<OrderEntity> findAllPlacedOrderDetails(String customerReferenceId) {
+        return orderRepository.findByCustomerReferenceIdAndStatus(customerReferenceId, OrderStatus.PLACED);
     }
 }

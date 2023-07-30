@@ -1,9 +1,9 @@
 package com.befoodly.be.controller;
 
-import com.befoodly.be.entity.OrderEntity;
 import com.befoodly.be.model.enums.OrderStatus;
 import com.befoodly.be.model.request.OrderRequest;
 import com.befoodly.be.model.response.GenericResponse;
+import com.befoodly.be.model.response.OrderResponse;
 import com.befoodly.be.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/v1/order")
@@ -29,19 +30,22 @@ public class OrderController {
     }
 
     @PutMapping("/edit")
-    public ResponseEntity<?> editOrderInCart(@RequestBody OrderRequest orderRequest,
-                                             @RequestParam(value = "count", required = false) Integer orderCount,
+    public ResponseEntity<GenericResponse<OrderResponse>> removeOrderInCart(@RequestBody OrderRequest orderRequest,
+                                             @RequestParam(value = "count", required = false) Optional<Integer> orderCount,
                                              @RequestParam(value = "status", required = false) OrderStatus status) {
-        orderService.editOrderInCart(orderRequest, orderCount, status);
+        OrderResponse orderResponse = orderService.removeOrderInCart(orderRequest, orderCount, status);
 
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>(GenericResponse.<OrderResponse>builder()
+                .statusCode(HttpStatus.OK.value())
+                .data(orderResponse)
+                .build(), HttpStatus.OK);
     }
 
     @GetMapping("/fetch/{customerReferenceId}")
-    public ResponseEntity<GenericResponse<List<OrderEntity>>> fetchAllPendingOrders(@PathVariable(value = "customerReferenceId") String customerReferenceId) {
-        List<OrderEntity> orderList = orderService.fetchAllPendingOrders(customerReferenceId);
+    public ResponseEntity<GenericResponse<OrderResponse>> fetchAllPendingOrders(@PathVariable(value = "customerReferenceId") String customerReferenceId) {
+        OrderResponse orderList = orderService.fetchAllPendingOrders(customerReferenceId);
 
-        return new ResponseEntity<>(GenericResponse.<List<OrderEntity>>builder()
+        return new ResponseEntity<>(GenericResponse.<OrderResponse>builder()
                 .data(orderList)
                 .statusCode(HttpStatus.OK.value())
                 .build(), HttpStatus.OK);
