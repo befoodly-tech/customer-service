@@ -12,6 +12,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -28,7 +29,7 @@ public class CustomerServiceImpl implements CustomerService {
             String referenceId = UUID.randomUUID().toString();
 
             CustomerEntity customer = CustomerEntity.builder()
-                    .name("Unknown")
+                    .name("Foodie")
                     .referenceId(referenceId)
                     .phoneNumber(request.getPhoneNumber())
                     .sessionToken(request.getSessionToken())

@@ -13,4 +13,6 @@ public interface LoginDataDao {
     void deleteUserByReferenceId(String referenceId);
 
     Optional<LoginDataEntity> findLastLoggedInUser(String phoneNumber, AppPlatform appPlatform);
+
+    Optional<LoginDataEntity> findActiveUserByPhoneNumber(String phoneNumber, AppPlatform appPlatform);
 }
