@@ -27,6 +27,7 @@ public class DeliveryBoyServiceImpl implements DeliveryBoyService {
             DeliveryBoyEntity entity = DeliveryBoyEntity.builder()
                     .referenceId(referenceId)
                     .name(request.getName())
+                    .imgUrl(request.getImgUrl())
                     .description(request.getDescription())
                     .phoneNumber(request.getPhoneNumber())
                     .panNumber(request.getPanNumber())

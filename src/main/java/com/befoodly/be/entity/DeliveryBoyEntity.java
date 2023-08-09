@@ -28,6 +28,8 @@ public class DeliveryBoyEntity extends BaseEntity {
     @Column(nullable = false)
     String name;
 
+    String imgUrl;
+
     @Column(nullable = false)
     String phoneNumber;
 

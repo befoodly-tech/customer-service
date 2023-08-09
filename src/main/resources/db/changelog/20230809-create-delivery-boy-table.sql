@@ -7,6 +7,7 @@ CREATE TABLE delivery_boy_data (
    reference_id VARCHAR(255) NOT NULL,
    name VARCHAR(255) NOT NULL,
    phone_number VARCHAR(255) NOT NULL,
+   img_url VARCHAR(255),
    pan_number VARCHAR(255) NOT NULL,
    description VARCHAR(255),
    address TEXT,

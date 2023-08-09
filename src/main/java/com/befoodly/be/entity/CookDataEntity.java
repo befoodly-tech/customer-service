@@ -23,7 +23,10 @@ public class CookDataEntity extends BaseEntity {
     @Column(nullable = false, unique = true)
     String referenceId;
 
+    @Column(nullable = false)
     String name;
+
+    String imgUrl;
 
     @Column(nullable = false)
     String phoneNumber;
@@ -34,6 +37,8 @@ public class CookDataEntity extends BaseEntity {
     Long vendorId;
 
     String description;
+
+    Long orderCounts;
 
     String address;
 

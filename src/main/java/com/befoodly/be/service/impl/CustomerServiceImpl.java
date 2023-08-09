@@ -6,6 +6,7 @@ import com.befoodly.be.exception.throwable.InvalidException;
 import com.befoodly.be.model.request.AddressCreateRequest;
 import com.befoodly.be.model.request.CustomerCreateRequest;
 import com.befoodly.be.model.request.CustomerEditRequest;
+import com.befoodly.be.service.AddressService;
 import com.befoodly.be.service.CustomerService;
 import com.befoodly.be.utils.JacksonUtils;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,8 @@ import java.util.UUID;
 public class CustomerServiceImpl implements CustomerService {
 
     private final CustomerDataDao customerDataDao;
+
+    private final AddressService addressService;
 
     @Override
     public String createCustomer(CustomerCreateRequest request) {
@@ -71,6 +74,7 @@ public class CustomerServiceImpl implements CustomerService {
 
             if (ObjectUtils.isNotEmpty(request.getAddress())) {
                 customer.setAddress(convertToOneLineAddress(request.getAddress()));
+                addressService.addAddress(customerReferenceId, request.getAddress());
             }
 
             customerDataDao.save(customer);

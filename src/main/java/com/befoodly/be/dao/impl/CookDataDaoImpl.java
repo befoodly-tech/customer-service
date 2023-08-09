@@ -7,6 +7,8 @@ import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 @AllArgsConstructor
 public class CookDataDaoImpl implements CookDataDao {
@@ -16,5 +18,15 @@ public class CookDataDaoImpl implements CookDataDao {
     @Override
     public void save(@NonNull CookDataEntity cookDataEntity) {
         cookDataRepository.saveAndFlush(cookDataEntity);
+    }
+
+    @Override
+    public List<CookDataEntity> fetchFivePopularCooks(Long orderCounts) {
+        return cookDataRepository.findPopularCooks(orderCounts);
+    }
+
+    @Override
+    public List<CookDataEntity> fetchAllCooksForVendor(Long vendorId) {
+        return cookDataRepository.findByVendorId(vendorId);
     }
 }

@@ -1,23 +1,23 @@
-package com.befoodly.be.model.request;
+package com.befoodly.be.model.response;
 
 import com.befoodly.be.model.Feedback;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Data
 @Builder
-@AllArgsConstructor
-@NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class DeliveryBoyCreateRequest {
+public class CookProfileResponse {
+    Long id;
+    String referenceId;
+    Long vendorId;
     String name;
     String imgUrl;
-    String phoneNumber;
-    String panNumber;
     String description;
-    AddressCreateRequest address;
+    Long orderCounts;
+    List<String> specialities;
     Feedback feedback;
 }

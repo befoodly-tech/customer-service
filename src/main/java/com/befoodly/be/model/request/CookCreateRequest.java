@@ -14,6 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 public class CookCreateRequest {
     String name;
+    String imgUrl;
     String phoneNumber;
     String panNumber;
     Long vendorId;
