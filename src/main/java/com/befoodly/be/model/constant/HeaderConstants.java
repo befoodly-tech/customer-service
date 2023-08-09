@@ -6,6 +6,7 @@ public class HeaderConstants {
     public static final String HEADER_VALUE_BASIC_AUTHORIZATION = "Basic %s";
     public static final String HEADER_CORRELATION_ID = "X-Correlation-Id";
     public static final String HEADER_DEVICE_ID = "deviceId";
+    public static final String HEADER_PLATFORM = "platform";
     public static final String HEADER_APP_VERSION_CODE = "appVersionCode";
     public static final String HEADER_OS_VERSION = "osVersion";
     public static final String HEADER_SOURCE = "X-Source";

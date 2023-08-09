@@ -3,9 +3,11 @@ package com.befoodly.be.service.impl;
 import com.befoodly.be.dao.CustomerDataDao;
 import com.befoodly.be.entity.CustomerEntity;
 import com.befoodly.be.exception.throwable.InvalidException;
+import com.befoodly.be.model.request.AddressCreateRequest;
 import com.befoodly.be.model.request.CustomerCreateRequest;
 import com.befoodly.be.model.request.CustomerEditRequest;
 import com.befoodly.be.service.CustomerService;
+import com.befoodly.be.utils.JacksonUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.ObjectUtils;
@@ -67,8 +69,8 @@ public class CustomerServiceImpl implements CustomerService {
                 customer.setEmail(request.getEmail());
             }
 
-            if (StringUtils.isNotEmpty(request.getAddress())) {
-                customer.setAddress(request.getAddress());
+            if (ObjectUtils.isNotEmpty(request.getAddress())) {
+                customer.setAddress(convertToOneLineAddress(request.getAddress()));
             }
 
             customerDataDao.save(customer);
@@ -79,6 +81,19 @@ public class CustomerServiceImpl implements CustomerService {
             log.error("received error message while updating the customer data: {}", e.getMessage());
             throw e;
         }
+    }
+
+    private String convertToOneLineAddress (AddressCreateRequest request) {
+        String currentAddress = request.getAddressFirst();
+
+        if (StringUtils.isNotEmpty(request.getAddressSecond())) {
+            currentAddress += ", " + request.getAddressSecond();
+        }
+
+        currentAddress += ", " + request.getCity() + ", " + request.getPinCode();
+        currentAddress += ", " + request.getState();
+
+        return currentAddress;
     }
 
     @Override

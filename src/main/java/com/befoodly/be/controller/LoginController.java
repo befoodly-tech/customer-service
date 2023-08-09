@@ -10,7 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import static com.befoodly.be.model.constant.CommonConstants.REFERENCE_ID;
+import static com.befoodly.be.model.constant.CommonConstants.PHONE_NUMBER;
+import static com.befoodly.be.model.constant.HeaderConstants.HEADER_PLATFORM;
 
 @RestController
 @RequestMapping("/v1")
@@ -21,8 +22,8 @@ public class LoginController {
     private final LoginService loginService;
 
     @PostMapping(value = "/login/{phoneNumber}")
-    public ResponseEntity<GenericResponse<String>> loginUser(@PathVariable(value = "phoneNumber") String phoneNumber,
-                                                             @RequestHeader(value = "platform") AppPlatform appPlatform) {
+    public ResponseEntity<GenericResponse<String>> loginUser(@PathVariable(value = PHONE_NUMBER) String phoneNumber,
+                                                             @RequestHeader(value = HEADER_PLATFORM) AppPlatform appPlatform) {
         String sessionToken = loginService.loginUser(phoneNumber, appPlatform);
         return ResponseEntity.ok(GenericResponse.<String>builder()
                 .data(sessionToken)
@@ -31,8 +32,8 @@ public class LoginController {
     }
 
     @PostMapping(value = "/logout/{phoneNumber}")
-    public ResponseEntity<GenericResponse<String>> logoutUser(@PathVariable(value = "phoneNumber") String phoneNumber,
-                                                              @RequestHeader(value = "platform") AppPlatform appPlatform) {
+    public ResponseEntity<GenericResponse<String>> logoutUser(@PathVariable(value = PHONE_NUMBER) String phoneNumber,
+                                                              @RequestHeader(value = HEADER_PLATFORM) AppPlatform appPlatform) {
         String logoutMessage = loginService.logoutUser(phoneNumber, appPlatform);
         return ResponseEntity.ok(GenericResponse.<String>builder()
                 .data(logoutMessage)
@@ -40,19 +41,20 @@ public class LoginController {
                 .build());
     }
 
-    @DeleteMapping(value = "/login-edit/{referenceId}")
-    public ResponseEntity<GenericResponse<String>> editPhoneNumber(@PathVariable(value = REFERENCE_ID) String referenceId) {
-        loginService.editLoginNumber(referenceId);
+    @DeleteMapping(value = "/login-edit/{phoneNumber}")
+    public ResponseEntity<GenericResponse<String>> editPhoneNumber(@PathVariable(value = PHONE_NUMBER) String phoneNumber,
+                                                                   @RequestHeader(value = HEADER_PLATFORM) AppPlatform appPlatform) {
+        loginService.editLoginNumber(phoneNumber, appPlatform);
         return ResponseEntity.ok(GenericResponse.<String>builder()
-                .data("Deleted")
+                .data("Deleted!")
                 .statusCode(HttpStatus.OK.value())
                 .build());
     }
 
     @PutMapping(value = "/otp-verify/{phoneNumber}")
     public ResponseEntity<GenericResponse<LoginResponse>> userOtpVerify(@RequestParam(value = "otp") String otp,
-                                                                 @RequestHeader(value = "platform") AppPlatform appPlatform,
-                                                                 @PathVariable(value = "phoneNumber") String phoneNumber) {
+                                                                 @RequestHeader(value = HEADER_PLATFORM) AppPlatform appPlatform,
+                                                                 @PathVariable(value = PHONE_NUMBER) String phoneNumber) {
         LoginResponse loginResponse = loginService.otpVerification(otp, phoneNumber, appPlatform);
         return ResponseEntity.ok(GenericResponse.<LoginResponse>builder()
                 .data(loginResponse)
@@ -61,8 +63,8 @@ public class LoginController {
     }
 
     @PutMapping(value = "/resend-otp/{phoneNumber}")
-    public ResponseEntity<GenericResponse<String>> resendOtp(@PathVariable(value = "phoneNumber") String phoneNumber,
-                                                             @RequestHeader(value = "platform") AppPlatform appPlatform) {
+    public ResponseEntity<GenericResponse<String>> resendOtp(@PathVariable(value = PHONE_NUMBER) String phoneNumber,
+                                                             @RequestHeader(value = HEADER_PLATFORM) AppPlatform appPlatform) {
         String message = loginService.resendOtp(phoneNumber, appPlatform);
         return ResponseEntity.ok(GenericResponse.<String>builder()
                 .data(message)

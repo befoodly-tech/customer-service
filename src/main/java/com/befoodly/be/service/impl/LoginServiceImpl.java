@@ -92,9 +92,20 @@ public class LoginServiceImpl implements LoginService {
                 throw new InvalidException("No active logged in user with phone number!");
             }
 
+            Optional<CustomerEntity> customerEntity = customerDataDao.findCustomerByPhoneNumber(phoneNumber);
+
+            if (customerEntity.isEmpty()) {
+                log.info("No active customer details found with number: {}", phoneNumber);
+                throw new InvalidException("Invalid phone number!");
+            }
+
             LoginDataEntity loginData = currentData.get();
+            CustomerEntity customerdata = customerEntity.get();
+
             loginData.setIsExpired(true);
             loginData.setExpiryReason(ExpiryReason.LOGOUT);
+
+            customerdata.setIsActive(false);
 
             loginDataDao.save(loginData);
             log.info("Successfully! expired the session token for previous logged in user: {}", phoneNumber);
@@ -148,6 +159,7 @@ public class LoginServiceImpl implements LoginService {
                 } else {
                     CustomerEntity customer = customerEntity.get();
                     customer.setSessionToken(loginData.getSessionToken());
+                    customer.setIsActive(true);
 
                     loginResponse.setCustomerData(customer);
                     loginResponse.setIsCustomerExist(true);
@@ -196,13 +208,20 @@ public class LoginServiceImpl implements LoginService {
 
     @Override
     @Transactional
-    public void editLoginNumber(String referenceId) {
+    public void editLoginNumber(String phoneNumber, AppPlatform appPlatform) {
 
         try {
+            Optional<LoginDataEntity> entity = loginDataDao.findActiveUserByPhoneNumber(phoneNumber, appPlatform);
+
+            if (entity.isEmpty()) {
+                log.info("No active user found with phone number: {}", phoneNumber);
+                throw new InvalidException("Invalid Phone Number Entered!");
+            }
+
             log.info("deletes user to edit the login number");
-            loginDataDao.deleteUserByReferenceId(referenceId);
+            loginDataDao.deleteUserByReferenceId(entity.get().getReferenceId());
         } catch (Exception e) {
-            log.error("Received error while resend otp: {}, for reference Id: {}", e.getMessage(), referenceId);
+            log.error("Received error while resend otp: {}, for phone number: {}", e.getMessage(), phoneNumber);
             throw e;
         }
     }

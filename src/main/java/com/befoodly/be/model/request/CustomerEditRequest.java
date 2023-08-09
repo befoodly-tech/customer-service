@@ -14,5 +14,5 @@ import lombok.NoArgsConstructor;
 public class CustomerEditRequest {
     String name;
     String email;
-    String address;
+    AddressCreateRequest address;
 }

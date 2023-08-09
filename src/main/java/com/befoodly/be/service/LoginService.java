@@ -13,5 +13,5 @@ public interface LoginService {
 
     String resendOtp(String phoneNumber, AppPlatform appPlatform);
 
-    void editLoginNumber(String phoneNumber);
+    void editLoginNumber(String phoneNumber, AppPlatform appPlatform);
 }
