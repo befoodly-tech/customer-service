@@ -8,6 +8,8 @@
 	<name>customer-service</name>
 	<description>Customer service for befoodly</description>
 	<properties>
+		<maven.compiler.source>17</maven.compiler.source>
+		<maven.compiler.target>17</maven.compiler.target>
 		<java.version>11</java.version>
 		<log4j2.ecs.layout.version>1.5.0</log4j2.ecs.layout.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -89,14 +91,16 @@
 			<artifactId>postgresql</artifactId>
 			<version>42.4.3</version>
 		</dependency>
+		<dependency>
+			<groupId>com.amazonaws</groupId>
+			<artifactId>aws-java-sdk-sns</artifactId>
+			<version>1.12.520</version>
+		</dependency>
 	</dependencies>
 
 	<build>
+		<defaultGoal>install</defaultGoal>
 		<plugins>
-			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>

@@ -1,5 +1,6 @@
 package com.befoodly.be.service.impl;
 
+import com.befoodly.be.clients.AwsSnsClient;
 import com.befoodly.be.dao.CustomerDataDao;
 import com.befoodly.be.dao.LoginDataDao;
 import com.befoodly.be.entity.CustomerEntity;
@@ -33,6 +34,8 @@ public class LoginServiceImpl implements LoginService {
 
     private final CustomerDataDao customerDataDao;
 
+    private final AwsSnsClient awsSnsClient;
+
     @Override
     public String loginUser(String phoneNumber, AppPlatform appPlatform) {
 
@@ -43,6 +46,7 @@ public class LoginServiceImpl implements LoginService {
 
             String referenceId = UUID.randomUUID().toString();
             String sessionToken = UUID.randomUUID().toString();
+            String otp = CommonUtils.GenerateOtp();
 
             LoginDataEntity addUserData = LoginDataEntity.builder()
                     .referenceId(referenceId)
@@ -50,9 +54,12 @@ public class LoginServiceImpl implements LoginService {
                     .sessionToken(sessionToken)
                     .phoneNumber(phoneNumber)
                     .isExpired(false)
-                    .otp(CommonUtils.GenerateOtp())
+                    .otp(otp)
                     .otpVerified(false)
                     .build();
+
+            String otpMessage = getOtpMessage(otp);
+            awsSnsClient.sendOTPMessage(otpMessage, phoneNumber);
 
             loginDataDao.save(addUserData);
             log.info("Added the login details of user with number: {}", phoneNumber);
@@ -63,6 +70,10 @@ public class LoginServiceImpl implements LoginService {
             log.error("Received error while logging in: {} with number: {}", e.getMessage(), phoneNumber);
             throw e;
         }
+    }
+
+    private String getOtpMessage(String otp) {
+        return "Hello! from BeFoodly, kindly verify your phone number with one-time password(OTP): " + otp;
     }
 
     @Override
