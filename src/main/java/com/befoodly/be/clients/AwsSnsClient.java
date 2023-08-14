@@ -26,7 +26,7 @@ public class AwsSnsClient {
 
     public void sendOTPMessage (String message, String phoneNumber) {
         try {
-            AmazonSNS snsClient = AmazonSNSClient.builder().withRegion(Regions.AP_SOUTH_1).build();
+            AmazonSNS snsClient = AmazonSNSClient.builder().withRegion(Regions.US_EAST_1).build();
             Map<String, MessageAttributeValue> smsAttributes = new HashMap<>();
 
             smsAttributes.put("AWS.SNS.SMS.SenderID", new MessageAttributeValue()

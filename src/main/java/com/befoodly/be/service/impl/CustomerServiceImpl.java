@@ -8,6 +8,7 @@ import com.befoodly.be.model.request.CustomerCreateRequest;
 import com.befoodly.be.model.request.CustomerEditRequest;
 import com.befoodly.be.service.AddressService;
 import com.befoodly.be.service.CustomerService;
+import com.befoodly.be.utils.CommonUtils;
 import com.befoodly.be.utils.JacksonUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -28,7 +29,7 @@ public class CustomerServiceImpl implements CustomerService {
     private final AddressService addressService;
 
     @Override
-    public String createCustomer(CustomerCreateRequest request) {
+    public CustomerEntity createCustomer(CustomerCreateRequest request) {
 
         try {
             String referenceId = UUID.randomUUID().toString();
@@ -44,7 +45,7 @@ public class CustomerServiceImpl implements CustomerService {
             customerDataDao.save(customer);
             log.info("successfully saved the data for customer id: {}", referenceId);
 
-            return referenceId;
+            return customer;
 
         } catch(Exception e) {
             log.error("received error message while saving the customer data: {}", e.getMessage());
@@ -73,7 +74,13 @@ public class CustomerServiceImpl implements CustomerService {
             }
 
             if (ObjectUtils.isNotEmpty(request.getAddress())) {
-                customer.setAddress(convertToOneLineAddress(request.getAddress()));
+                AddressCreateRequest addressCreateRequest = request.getAddress();
+
+                if (StringUtils.isEmpty(addressCreateRequest.getPhoneNumber())) {
+                    addressCreateRequest.setPhoneNumber(customer.getPhoneNumber());
+                }
+
+                customer.setAddress(CommonUtils.convertToOneLineAddress(request.getAddress()));
                 addressService.addAddress(customerReferenceId, request.getAddress());
             }
 
@@ -85,19 +92,6 @@ public class CustomerServiceImpl implements CustomerService {
             log.error("received error message while updating the customer data: {}", e.getMessage());
             throw e;
         }
-    }
-
-    private String convertToOneLineAddress (AddressCreateRequest request) {
-        String currentAddress = request.getAddressFirst();
-
-        if (StringUtils.isNotEmpty(request.getAddressSecond())) {
-            currentAddress += ", " + request.getAddressSecond();
-        }
-
-        currentAddress += ", " + request.getCity() + ", " + request.getPinCode();
-        currentAddress += ", " + request.getState();
-
-        return currentAddress;
     }
 
     @Override

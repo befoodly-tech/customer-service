@@ -21,8 +21,3 @@ CREATE TABLE product_data (
    version INTEGER,
    CONSTRAINT pk_product_data PRIMARY KEY (id)
 );
-
-ALTER TABLE product_data
-    ADD CONSTRAINT fk_product_data
-    FOREIGN KEY (vendor_id)
-    REFERENCES vendor_data(id);

@@ -37,11 +37,20 @@ public class LoginServiceImpl implements LoginService {
     private final AwsSnsClient awsSnsClient;
 
     @Override
+    @Transactional
     public String loginUser(String phoneNumber, AppPlatform appPlatform) {
 
         try {
             if (StringUtils.isEmpty(phoneNumber)) {
                 return null;
+            }
+
+            Optional<LoginDataEntity> loginDataEntity = loginDataDao.findActiveUserByPhoneNumber(phoneNumber, appPlatform);
+
+            if (loginDataEntity.isPresent()) {
+                LoginDataEntity currentLoginData = loginDataEntity.get();
+                currentLoginData.setIsExpired(true);
+                loginDataDao.save(currentLoginData);
             }
 
             String referenceId = UUID.randomUUID().toString();
@@ -59,7 +68,7 @@ public class LoginServiceImpl implements LoginService {
                     .build();
 
             String otpMessage = getOtpMessage(otp);
-            awsSnsClient.sendOTPMessage(otpMessage, phoneNumber);
+            awsSnsClient.sendOTPMessage(otpMessage, phoneNumberWithCode(phoneNumber));
 
             loginDataDao.save(addUserData);
             log.info("Added the login details of user with number: {}", phoneNumber);
@@ -100,12 +109,12 @@ public class LoginServiceImpl implements LoginService {
             }
 
             LoginDataEntity loginData = currentData.get();
-            CustomerEntity customerdata = customerEntity.get();
+            CustomerEntity customerData = customerEntity.get();
 
             loginData.setIsExpired(true);
             loginData.setExpiryReason(ExpiryReason.LOGOUT);
 
-            customerdata.setIsActive(false);
+            customerData.setIsActive(false);
 
             loginDataDao.save(loginData);
             log.info("Successfully! expired the session token for previous logged in user: {}", phoneNumber);
@@ -152,17 +161,20 @@ public class LoginServiceImpl implements LoginService {
                             .sessionToken(loginData.getSessionToken())
                             .build();
 
-                    loginResponse.setCustomerData(null);
-                    loginResponse.setIsCustomerExist(false);
-
-                    customerService.createCustomer(customerCreateRequest);
+                    CustomerEntity customer = customerService.createCustomer(customerCreateRequest);
+                    loginResponse.setCustomerData(customer);
+                    loginResponse.setIsCustomerDataExist(false);
                 } else {
                     CustomerEntity customer = customerEntity.get();
                     customer.setSessionToken(loginData.getSessionToken());
                     customer.setIsActive(true);
 
                     loginResponse.setCustomerData(customer);
-                    loginResponse.setIsCustomerExist(true);
+                    if (StringUtils.isEmpty(customer.getAddress())) {
+                        loginResponse.setIsCustomerDataExist(false);
+                    } else {
+                        loginResponse.setIsCustomerDataExist(true);
+                    }
 
                     customerDataDao.save(customer);
                 }
@@ -224,5 +236,9 @@ public class LoginServiceImpl implements LoginService {
             log.error("Received error while resend otp: {}, for phone number: {}", e.getMessage(), phoneNumber);
             throw e;
         }
+    }
+
+    private String phoneNumberWithCode (String phoneNumber) {
+        return "+91" + phoneNumber;
     }
 }

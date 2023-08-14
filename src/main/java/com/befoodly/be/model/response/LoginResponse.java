@@ -12,5 +12,5 @@ public class LoginResponse {
     Long id;
     String referenceId;
     CustomerEntity customerData;
-    Boolean isCustomerExist;
+    Boolean isCustomerDataExist;
 }

@@ -7,7 +7,7 @@ import com.befoodly.be.model.request.CustomerEditRequest;
 import java.util.Optional;
 
 public interface CustomerService {
-    String createCustomer(CustomerCreateRequest request);
+    CustomerEntity createCustomer(CustomerCreateRequest request);
     CustomerEntity editCustomerDetails(String customerReferenceId, CustomerEditRequest request);
     CustomerEntity fetchCustomerDetails(String customerReferenceId);
 }

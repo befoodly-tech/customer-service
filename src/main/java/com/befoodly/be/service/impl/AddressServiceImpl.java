@@ -8,11 +8,13 @@ import com.befoodly.be.exception.throwable.DuplicationException;
 import com.befoodly.be.exception.throwable.InvalidException;
 import com.befoodly.be.model.request.AddressCreateRequest;
 import com.befoodly.be.service.AddressService;
+import com.befoodly.be.utils.CommonUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -70,10 +72,13 @@ public class AddressServiceImpl implements AddressService {
     }
 
     @Override
+    @Transactional
     public AddressEntity editAddress(String customerReferenceId, String title, AddressCreateRequest request) {
 
         try {
-            if (isCustomerExist(customerReferenceId)) {
+            CustomerEntity customer = customerDataDao.findCustomerByReferenceId(customerReferenceId);
+
+            if (ObjectUtils.isNotEmpty(customer)) {
                 Optional<AddressEntity> address = addressDataDao.findAddressByCustomerIdAndTitle(customerReferenceId, title);
 
                 if (address.isEmpty()) {
@@ -91,7 +96,10 @@ public class AddressServiceImpl implements AddressService {
                 currentAddress.setCity(request.getCity());
                 currentAddress.setState(request.getState());
 
+                customer.setAddress(CommonUtils.convertToOneLineAddress(request));
+
                 addressDataDao.save(currentAddress);
+                customerDataDao.save(customer);
                 log.info("successfully updated the address for customerId:{}", customerReferenceId);
 
                 return currentAddress;

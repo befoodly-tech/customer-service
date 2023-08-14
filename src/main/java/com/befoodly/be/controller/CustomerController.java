@@ -22,12 +22,12 @@ public class CustomerController {
     private final CustomerService customerService;
 
     @PostMapping(value = "/create")
-    public ResponseEntity<GenericResponse<String>> createCustomer(@RequestBody CustomerCreateRequest request) {
-        String customerReferenceId = customerService.createCustomer(request);
+    public ResponseEntity<GenericResponse<CustomerEntity>> createCustomer(@RequestBody CustomerCreateRequest request) {
+        CustomerEntity customerEntity = customerService.createCustomer(request);
 
-        return new ResponseEntity<>(GenericResponse.<String>builder()
+        return new ResponseEntity<>(GenericResponse.<CustomerEntity>builder()
                 .statusCode(HttpStatus.CREATED.value())
-                .data(customerReferenceId)
+                .data(customerEntity)
                 .build(), HttpStatus.CREATED);
     }
 
