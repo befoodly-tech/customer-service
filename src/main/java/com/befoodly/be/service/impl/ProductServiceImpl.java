@@ -62,22 +62,7 @@ public class ProductServiceImpl implements ProductService {
             log.info("fetched all products list!");
 
             List<ProductDataResponse> activeProductList = productEntities.stream()
-                    .map(productEntity -> ProductDataResponse.builder()
-                            .id(productEntity.getId())
-                            .referenceId(productEntity.getReferenceId())
-                            .title(productEntity.getTitle())
-                            .description(productEntity.getDescription())
-                            .imgUrl(productEntity.getImgUrl())
-                            .price(productEntity.getPrice())
-                            .orderNo(productEntity.getOrderNo())
-                            .acceptingTime(productEntity.getAcceptingTime())
-                            .deliveryTime(productEntity.getDeliveryTime())
-                            .feedback(JacksonUtils.stringToObject(productEntity.getFeedback(), Feedback.class))
-                            .vendorId(productEntity.getVendorId())
-                            .providerData(JacksonUtils.stringToObject(productEntity.getProviderData(), ProductProvider.class))
-                            .createdAt(productEntity.getCreatedAt())
-                            .updatedAt(productEntity.getUpdatedAt())
-                            .build())
+                    .map(productEntity -> mapProductEntityToProductDataResponse(productEntity))
                     .collect(Collectors.toList());
 
             return activeProductList;
@@ -85,5 +70,41 @@ public class ProductServiceImpl implements ProductService {
             log.error("received error message: {} while fetching all active products", e.getMessage());
             throw e;
         }
+    }
+
+    @Override
+    public List<ProductDataResponse> fetchActiveProductsByVendor(Long vendorId) {
+        try {
+            List<ProductEntity> productEntities = productDataDao.findActiveProductByVendorId(vendorId);
+            log.info("Successfully! fetched the product data for vendor id: {}", vendorId);
+
+            List<ProductDataResponse> activeProductList = productEntities.stream()
+                    .map(productEntity -> mapProductEntityToProductDataResponse(productEntity))
+                    .collect(Collectors.toList());
+
+            return activeProductList;
+        } catch (Exception e) {
+            log.error("Received error: {} while fetch product data for vendor id: {}", e.getMessage(), vendorId);
+            throw e;
+        }
+    }
+
+    private ProductDataResponse mapProductEntityToProductDataResponse(ProductEntity productEntity) {
+        return ProductDataResponse.builder()
+                .id(productEntity.getId())
+                .referenceId(productEntity.getReferenceId())
+                .title(productEntity.getTitle())
+                .description(productEntity.getDescription())
+                .imgUrl(productEntity.getImgUrl())
+                .price(productEntity.getPrice())
+                .orderNo(productEntity.getOrderNo())
+                .acceptingTime(productEntity.getAcceptingTime())
+                .deliveryTime(productEntity.getDeliveryTime())
+                .feedback(JacksonUtils.stringToObject(productEntity.getFeedback(), Feedback.class))
+                .vendorId(productEntity.getVendorId())
+                .providerData(JacksonUtils.stringToObject(productEntity.getProviderData(), ProductProvider.class))
+                .createdAt(productEntity.getCreatedAt())
+                .updatedAt(productEntity.getUpdatedAt())
+                .build();
     }
 }

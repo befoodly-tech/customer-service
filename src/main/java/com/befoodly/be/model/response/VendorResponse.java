@@ -21,6 +21,7 @@ public class VendorResponse {
     VendorStatus status;
     String email;
     String address;
-    List<Integer> cookList;
+    List<CookProfileResponse> cookList;
+    List<ProductDataResponse> productList;
     Feedback feedback;
 }
