@@ -46,4 +46,15 @@ public class CookController {
                 .statusCode(HttpStatus.OK.value())
                 .build(), HttpStatus.OK);
     }
+
+    @PutMapping(value = "/{id}")
+    public ResponseEntity<GenericResponse<CookProfileResponse>> updateCookOrderCounts (@PathVariable(value = "id") Long id,
+                                                                                       @RequestParam(value = "orderCounts") Long orderCounts) {
+        CookProfileResponse response = cookService.updateCookOrderCounts(id, orderCounts);
+
+        return new ResponseEntity<>(GenericResponse.<CookProfileResponse>builder()
+                .data(response)
+                .statusCode(HttpStatus.OK.value())
+                .build(), HttpStatus.OK);
+    }
 }

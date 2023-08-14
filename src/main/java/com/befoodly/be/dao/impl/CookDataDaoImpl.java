@@ -8,6 +8,7 @@ import lombok.NonNull;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Optional;
 
 @Component
 @AllArgsConstructor
@@ -28,5 +29,10 @@ public class CookDataDaoImpl implements CookDataDao {
     @Override
     public List<CookDataEntity> fetchAllCooksForVendor(Long vendorId) {
         return cookDataRepository.findByVendorId(vendorId);
+    }
+
+    @Override
+    public Optional<CookDataEntity> fetchCookById(Long id) {
+        return cookDataRepository.findById(id);
     }
 }
