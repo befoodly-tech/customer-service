@@ -11,7 +11,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -22,18 +21,30 @@ public class OrderController {
     @Autowired
     private final OrderService orderService;
 
-    @PostMapping("/add-to-cart")
-    public ResponseEntity<?> addOrderToCart(@RequestBody OrderRequest orderRequest) {
-        orderService.addOrderToCart(orderRequest);
+    @PostMapping("/add-to-cart/{customerReferenceId}")
+    public ResponseEntity<?> addOrderToCart(@PathVariable(value = "customerReferenceId") String customerReferenceId,
+                                            @RequestBody OrderRequest orderRequest) {
+        orderService.addOrderToCart(customerReferenceId, orderRequest);
 
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
-    @PutMapping("/edit")
-    public ResponseEntity<GenericResponse<OrderResponse>> removeOrderInCart(@RequestBody OrderRequest orderRequest,
-                                             @RequestParam(value = "count", required = false) Optional<Integer> orderCount,
-                                             @RequestParam(value = "status", required = false) OrderStatus status) {
-        OrderResponse orderResponse = orderService.removeOrderInCart(orderRequest, orderCount, status);
+    @PutMapping("/edit-cart/{customerReferenceId}")
+    public ResponseEntity<GenericResponse<OrderResponse>> editOrderInCart(@PathVariable(value = "customerReferenceId") String customerReferenceId,
+                                             @RequestBody OrderRequest orderRequest,
+                                             @RequestParam(value = "count", required = false) Optional<Integer> orderCount) {
+        OrderResponse orderResponse = orderService.editOrderInCart(customerReferenceId,orderRequest, orderCount);
+
+        return new ResponseEntity<>(GenericResponse.<OrderResponse>builder()
+                .statusCode(HttpStatus.OK.value())
+                .data(orderResponse)
+                .build(), HttpStatus.OK);
+    }
+
+    @PutMapping("/update-cart/{customerReferenceId}")
+    public ResponseEntity<GenericResponse<OrderResponse>> updateStatusOfCart(@PathVariable(value = "customerReferenceId") String customerReferenceId,
+                                                                             @RequestParam(value = "status") OrderStatus status) {
+        OrderResponse orderResponse = orderService.placeOrRemovePendingOrder(customerReferenceId, status);
 
         return new ResponseEntity<>(GenericResponse.<OrderResponse>builder()
                 .statusCode(HttpStatus.OK.value())

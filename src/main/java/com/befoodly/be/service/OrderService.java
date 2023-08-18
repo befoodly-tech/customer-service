@@ -7,11 +7,12 @@ import com.befoodly.be.model.response.OrderResponse;
 import java.util.Optional;
 
 public interface OrderService {
-    void addOrderToCart(OrderRequest orderRequest);
+    void addOrderToCart(String customerReferenceId, OrderRequest orderRequest);
 
-    OrderResponse removeOrderInCart(OrderRequest orderRequest,
-                         Optional<Integer> orderCount,
-                         OrderStatus status);
+    OrderResponse editOrderInCart(String customerReferenceId, OrderRequest orderRequest,
+                                  Optional<Integer> orderCount);
 
     OrderResponse fetchAllPendingOrders(String customerReferenceId);
+
+    OrderResponse placeOrRemovePendingOrder(String customerReferenceId, OrderStatus status);
 }

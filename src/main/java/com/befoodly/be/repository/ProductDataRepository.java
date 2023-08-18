@@ -11,4 +11,6 @@ import java.util.List;
 public interface ProductDataRepository extends JpaRepository<ProductEntity, Long> {
 
     List<ProductEntity> findByStatus(ProductStatus status);
+
+    List<ProductEntity> findByStatusAndVendorId(ProductStatus status, Long vendorId);
 }

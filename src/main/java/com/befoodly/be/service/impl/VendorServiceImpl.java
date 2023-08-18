@@ -6,7 +6,11 @@ import com.befoodly.be.exception.throwable.InvalidException;
 import com.befoodly.be.model.Feedback;
 import com.befoodly.be.model.enums.VendorStatus;
 import com.befoodly.be.model.request.VendorRequest;
+import com.befoodly.be.model.response.CookProfileResponse;
+import com.befoodly.be.model.response.ProductDataResponse;
 import com.befoodly.be.model.response.VendorResponse;
+import com.befoodly.be.service.CookService;
+import com.befoodly.be.service.ProductService;
 import com.befoodly.be.service.VendorService;
 import com.befoodly.be.utils.JacksonUtils;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +27,10 @@ import java.util.UUID;
 public class VendorServiceImpl implements VendorService {
 
     private final VendorDataDao vendorDataDao;
+
+    private final CookService cookService;
+
+    private final ProductService productService;
 
     @Override
     public void createNewVendor(VendorRequest request) {
@@ -65,6 +73,9 @@ public class VendorServiceImpl implements VendorService {
                 throw new InvalidException("invalid id was passed, no data found!");
             }
 
+            List<CookProfileResponse> cookDataList = cookService.fetchAllCooksForVendor(id);
+            List<ProductDataResponse> activeProductList = productService.fetchActiveProductsByVendor(id);
+
             VendorEntity vendorData = optionalVendorData.get();
             VendorResponse vendorResponseData = VendorResponse.builder()
                     .id(vendorData.getId())
@@ -76,7 +87,8 @@ public class VendorServiceImpl implements VendorService {
                     .address(vendorData.getAddress())
                     .status(vendorData.getStatus())
                     .phoneNumber(vendorData.getPhoneNumber())
-                    .cookList(JacksonUtils.stringToObject(vendorData.getCookList(), List.class))
+                    .cookList(cookDataList)
+                    .productList(activeProductList)
                     .feedback(JacksonUtils.stringToObject(vendorData.getFeedback(), Feedback.class))
                     .build();
 

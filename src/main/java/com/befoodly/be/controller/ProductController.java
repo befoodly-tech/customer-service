@@ -36,4 +36,15 @@ public class ProductController {
                 .data(activeProducts)
                 .build(), HttpStatus.OK);
     }
+
+    @GetMapping(value = "/fetch/{vendorId}")
+    public ResponseEntity<GenericResponse<List<ProductDataResponse>>> fetchActiveProductsByVendor
+            (@PathVariable(value = "vendorId") Long vendorId) {
+        List<ProductDataResponse> activeProducts = productService.fetchAllActiveProducts();
+
+        return new ResponseEntity<>(GenericResponse.<List<ProductDataResponse>>builder()
+                .statusCode(HttpStatus.OK.value())
+                .data(activeProducts)
+                .build(), HttpStatus.OK);
+    }
 }

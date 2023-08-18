@@ -1,6 +1,7 @@
 package com.befoodly.be.repository;
 
 import com.befoodly.be.entity.LoginDataEntity;
+import com.befoodly.be.model.enums.AppPlatform;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -13,6 +14,7 @@ public interface LoginDataRepository extends JpaRepository<LoginDataEntity, Long
 
     Optional<LoginDataEntity> findByReferenceId(String referenceId);
 
-    @Query(nativeQuery = true, value = "select * from login_data where phone_number =:phoneNumber and app_platform =:appPlatform order by updated_at DESC limit 1")
-    Optional<LoginDataEntity> findByPhoneNumberAndAppPlatform(String phoneNumber, String appPlatform);
+    Optional<LoginDataEntity> findByPhoneNumberAndAppPlatform(String phoneNumber, AppPlatform appPlatform);
+
+    Optional<LoginDataEntity> findByPhoneNumberAndAppPlatformAndIsExpired(String phoneNumber, AppPlatform appPlatform, Boolean isExpired);
 }

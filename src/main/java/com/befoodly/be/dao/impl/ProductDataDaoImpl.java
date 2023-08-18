@@ -26,5 +26,10 @@ public class ProductDataDaoImpl implements ProductDataDao {
         return productDataRepository.findByStatus(ProductStatus.ACTIVE);
     }
 
+    @Override
+    public List<ProductEntity> findActiveProductByVendorId(Long vendorId) {
+        return productDataRepository.findByStatusAndVendorId(ProductStatus.ACTIVE, vendorId);
+    }
+
 
 }

@@ -2,6 +2,9 @@ package com.befoodly.be.model.constant;
 
 public class CommonConstants {
     public static final String REFERENCE_ID = "referenceId";
+    public static final String SESSION_TOKEN = "sessionToken";
+    public static final String PHONE_NUMBER = "phoneNumber";
+    public static final String CUSTOMER_ID = "customerReferenceId";
     public static final String SUCCESS_MESSAGE = "Done!";
     public static final String FAILURE_MESSAGE = "Failed!";
     public static final String SUCCESS_OTP_MESSAGE = "OTP verification successful!";

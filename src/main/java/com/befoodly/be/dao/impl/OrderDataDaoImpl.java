@@ -31,7 +31,7 @@ public class OrderDataDaoImpl implements OrderDataDao {
         List<OrderEntity> pendingOrderList = orderRepository.findByCustomerReferenceIdAndStatus(customerReferenceId, OrderStatus.PENDING);
 
         if (pendingOrderList.isEmpty()) {
-            return null;
+            return Optional.ofNullable(null);
         }
 
         return Optional.of(pendingOrderList.get(0));

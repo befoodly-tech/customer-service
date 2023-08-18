@@ -1,6 +1,7 @@
 package com.befoodly.be.service;
 
 import com.befoodly.be.model.enums.AppPlatform;
+import com.befoodly.be.model.response.LoginResponse;
 
 public interface LoginService {
 
@@ -8,9 +9,9 @@ public interface LoginService {
 
     String logoutUser(String phoneNumber, AppPlatform appPlatform);
 
-    String otpVerification(String otp, String referenceId);
+    LoginResponse otpVerification(String otp, String phoneNumber, AppPlatform appPlatform);
 
-    String resendOtp(String referenceId);
+    String resendOtp(String phoneNumber, AppPlatform appPlatform);
 
-    void editLoginNumber(String referenceId);
+    void editLoginNumber(String phoneNumber, AppPlatform appPlatform);
 }

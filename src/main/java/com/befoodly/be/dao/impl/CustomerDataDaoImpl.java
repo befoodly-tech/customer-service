@@ -21,15 +21,8 @@ public class CustomerDataDaoImpl implements CustomerDataDao {
     }
 
     @Override
-    public CustomerEntity findCustomerByPhoneNumber(String phoneNumber) {
-
-        Optional<CustomerEntity> customer = customerDataRepository.findByPhoneNumber(phoneNumber);
-
-        if (customer.isEmpty()) {
-            return null;
-        }
-
-        return customer.get();
+    public Optional<CustomerEntity> findCustomerByPhoneNumber(String phoneNumber) {
+        return customerDataRepository.findByPhoneNumber(phoneNumber);
     }
 
     @Override

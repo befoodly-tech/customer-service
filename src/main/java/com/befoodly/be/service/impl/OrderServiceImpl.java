@@ -2,25 +2,24 @@ package com.befoodly.be.service.impl;
 
 import com.befoodly.be.dao.DeliveryDataDao;
 import com.befoodly.be.dao.OrderDataDao;
+import com.befoodly.be.entity.DeliveryBoyEntity;
 import com.befoodly.be.entity.DeliveryEntity;
 import com.befoodly.be.entity.OrderEntity;
 import com.befoodly.be.exception.throwable.InvalidException;
-import com.befoodly.be.model.DeliveryManList;
 import com.befoodly.be.model.ProductList;
 import com.befoodly.be.model.enums.DeliveryStatus;
 import com.befoodly.be.model.enums.OrderStatus;
 import com.befoodly.be.model.request.OrderRequest;
 import com.befoodly.be.model.response.OrderResponse;
+import com.befoodly.be.service.DeliveryBoyService;
 import com.befoodly.be.service.OrderService;
 import com.befoodly.be.utils.JacksonUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.ObjectUtils;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -33,14 +32,13 @@ public class OrderServiceImpl implements OrderService {
 
     private final DeliveryDataDao deliveryDataDao;
 
-    @Value("#{${delivery.man.data.list}}")
-    Map<String, String> deliveryManData;
+    private final DeliveryBoyService deliveryBoyService;
 
     @Override
-    public void addOrderToCart(OrderRequest orderRequest) {
+    public void addOrderToCart(String customerReferenceId, OrderRequest orderRequest) {
 
         try {
-            Optional<OrderEntity> optionalOrderEntity = orderDataDao.findAllPendingOrderDetails(orderRequest.getCustomerReferenceId());
+            Optional<OrderEntity> optionalOrderEntity = orderDataDao.findAllPendingOrderDetails(customerReferenceId);
 
             if (optionalOrderEntity.isEmpty()) {
                 String getReferenceId = UUID.randomUUID().toString();
@@ -50,7 +48,7 @@ public class OrderServiceImpl implements OrderService {
 
                 OrderEntity orderEntity = OrderEntity.builder()
                         .referenceId(getReferenceId)
-                        .customerReferenceId(orderRequest.getCustomerReferenceId())
+                        .customerReferenceId(customerReferenceId)
                         .productList(JacksonUtils.objectToString(productList))
                         .status(OrderStatus.PENDING)
                         .totalCost(orderRequest.getCost())
@@ -89,21 +87,21 @@ public class OrderServiceImpl implements OrderService {
                 orderDataDao.save(currentOrderEntity);
             }
 
-            log.info("Successfully! saved the order in cart for customer id: {}", orderRequest.getCustomerReferenceId());
+            log.info("Successfully! saved the order in cart for customer id: {}", customerReferenceId);
 
         } catch (Exception e) {
             log.error("Failed to add the order in cart for customer id: {} due to error: {}",
-                    orderRequest.getCustomerReferenceId(), e.getMessage());
+                    customerReferenceId, e.getMessage());
 
             throw e;
         }
     }
 
     @Override
-    public OrderResponse removeOrderInCart(OrderRequest orderRequest, Optional<Integer> orderCount, OrderStatus status) {
+    public OrderResponse editOrderInCart(String customerReferenceId, OrderRequest orderRequest, Optional<Integer> orderCount) {
 
         try {
-            Optional<OrderEntity> orderEntity = orderDataDao.findAllPendingOrderDetails(orderRequest.getCustomerReferenceId());
+            Optional<OrderEntity> orderEntity = orderDataDao.findAllPendingOrderDetails(customerReferenceId);
 
             if (orderEntity.isEmpty()) {
                 log.info("No order found with orderRequest: {}", orderRequest);
@@ -118,7 +116,7 @@ public class OrderServiceImpl implements OrderService {
                     .findFirst();
 
             if (existingProductId.isEmpty()) {
-                log.info("No product id: {} present for customer: {}", orderRequest.getProductId(), orderRequest.getCustomerReferenceId());
+                log.info("No product id: {} present for customer: {}", orderRequest.getProductId(), customerReferenceId);
                 throw new InvalidException("Invalid product id!");
             }
 
@@ -148,26 +146,6 @@ public class OrderServiceImpl implements OrderService {
                 }
             }
 
-            if (ObjectUtils.isNotEmpty(status)) {
-                currentOrderEntity.setStatus(status);
-
-                if (OrderStatus.PLACED.equals(status)) {
-                    String referenceId = UUID.randomUUID().toString();
-                    DeliveryEntity deliveryEntity = DeliveryEntity.builder()
-                            .referenceId(referenceId)
-                            .name(deliveryManData.get("name"))
-                            .phoneNumber(deliveryManData.get("phoneNumber"))
-                            .orderId(currentOrderEntity.getId())
-                            .totalCost(currentOrderEntity.getTotalCost())
-                            .status(DeliveryStatus.INITIATED)
-                            .build();
-
-                    deliveryDataDao.save(deliveryEntity);
-                    log.info("Order id: {} for customer: {} is placed successfully!", currentOrderEntity.getId(),
-                            orderRequest.getCustomerReferenceId());
-                }
-            }
-
             orderDataDao.save(currentOrderEntity);
             log.info("Successfully! updated the order data.");
 
@@ -177,6 +155,8 @@ public class OrderServiceImpl implements OrderService {
             throw e;
         }
     }
+
+
 
     @Override
     public OrderResponse fetchAllPendingOrders(String customerReferenceId) {
@@ -198,6 +178,50 @@ public class OrderServiceImpl implements OrderService {
             return orderResponse;
         } catch (Exception e) {
             log.error("Failed to fetch the order data for customer: {} with error: {}", customerReferenceId, e.getMessage());
+            throw e;
+        }
+    }
+
+    @Override
+    public OrderResponse placeOrRemovePendingOrder(String customerReferenceId, OrderStatus status) {
+        try {
+            Optional<OrderEntity> findPendingOrder = orderDataDao.findAllPendingOrderDetails(customerReferenceId);
+
+            if (findPendingOrder.isEmpty()) {
+                log.info("No pending order present for customer id: {}", customerReferenceId);
+                throw new InvalidException("No pending order present for customer!");
+            }
+
+            OrderEntity currentOrderEntity = findPendingOrder.get();
+
+            if (ObjectUtils.isNotEmpty(status)) {
+                currentOrderEntity.setStatus(status);
+
+                if (OrderStatus.PLACED.equals(status)) {
+                    String referenceId = UUID.randomUUID().toString();
+                    DeliveryBoyEntity deliveryBoyEntity = deliveryBoyService.fetchAvailableDeliveryBoy();
+
+                    DeliveryEntity deliveryEntity = DeliveryEntity.builder()
+                            .referenceId(referenceId)
+                            .name(deliveryBoyEntity.getName())
+                            .phoneNumber(deliveryBoyEntity.getPhoneNumber())
+                            .orderId(currentOrderEntity.getId())
+                            .totalCost(currentOrderEntity.getTotalCost())
+                            .status(DeliveryStatus.INITIATED)
+                            .build();
+
+                    deliveryDataDao.save(deliveryEntity);
+                    log.info("Order id: {} for customer: {} is placed successfully!", currentOrderEntity.getId(),
+                            customerReferenceId);
+                }
+            }
+
+            orderDataDao.save(currentOrderEntity);
+            log.info("updated the status of current order entity in the database!");
+
+            return mapToOrderResponse(currentOrderEntity);
+        } catch (Exception e) {
+            log.error("received error: {} while changing status of pending order for customer: {}", e.getMessage(), customerReferenceId);
             throw e;
         }
     }

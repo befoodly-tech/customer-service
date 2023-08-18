@@ -32,6 +32,11 @@ public class LoginDataDaoImpl implements LoginDataDao {
 
     @Override
     public Optional<LoginDataEntity> findLastLoggedInUser(String phoneNumber, AppPlatform appPlatform) {
-        return loginDataRepository.findByPhoneNumberAndAppPlatform(phoneNumber, appPlatform.name());
+        return loginDataRepository.findByPhoneNumberAndAppPlatform(phoneNumber, appPlatform);
+    }
+
+    @Override
+    public Optional<LoginDataEntity> findActiveUserByPhoneNumber(String phoneNumber, AppPlatform appPlatform) {
+        return loginDataRepository.findByPhoneNumberAndAppPlatformAndIsExpired(phoneNumber, appPlatform, false);
     }
 }
