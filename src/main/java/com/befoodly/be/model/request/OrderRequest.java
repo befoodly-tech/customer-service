@@ -8,7 +8,6 @@ import lombok.Data;
 @Builder
 @AllArgsConstructor
 public class OrderRequest {
-    String customerReferenceId;
     Long productId;
     Double cost;
 }
