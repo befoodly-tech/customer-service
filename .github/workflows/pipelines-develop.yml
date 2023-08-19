@@ -7,6 +7,7 @@ on:
 
 jobs:
   setup-build-publish-deploy:
+    if: github.repository == 'befoodly-tech/customer-service'
     name: Setup, Build, Publish, and Deploy
     runs-on: ubuntu-latest
 
