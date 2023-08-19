@@ -1,13 +1,10 @@
 # syntax=docker/dockerfile:1
 
-FROM eclipse-temurin:17-jdk-jammy
+FROM openjdk:17-jdk-alpine
 
-WORKDIR /app
-
-COPY .mvn/ .mvn
-COPY mvnw pom.xml ./
-RUN ./mvnw dependency:resolve
-
-COPY src ./src
 EXPOSE 8080
-CMD ["./mvnw", "spring-boot:run"]
+
+ARG JAR_FILE=target/customer-service-0.0.1-SNAPSHOT.jar
+ADD ${JAR_FILE} app.jar
+
+ENTRYPOINT exec java -jar /app.jar
