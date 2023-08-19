@@ -17,7 +17,7 @@
       "entryPoint": [],
       "portMappings": [
         {
-          "hostPort": 0,
+          "hostPort": 80,
           "protocol": "tcp",
           "containerPort": 8080
         }
@@ -64,7 +64,7 @@
     "EXTERNAL",
     "EC2"
   ],
-  "taskDefinitionArn": "arn:aws:ecs:ap-south-1:216059786895:task-definition/befoodly-task:1",
+  "taskDefinitionArn": "arn:aws:ecs:ap-south-1:216059786895:task-definition/befoodly-task:3",
   "family": "befoodly-task",
   "pidMode": null,
   "requiresCompatibilities": [
@@ -73,7 +73,7 @@
   "networkMode": "bridge",
   "runtimePlatform": null,
   "cpu": null,
-  "revision": 1,
+  "revision": 3,
   "status": "ACTIVE",
   "inferenceAccelerators": null,
   "proxyConfiguration": null,
