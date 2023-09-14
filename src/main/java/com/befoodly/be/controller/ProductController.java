@@ -38,6 +38,16 @@ public class ProductController {
                 .build(), HttpStatus.OK);
     }
 
+    @GetMapping(value = "/fetch/popular")
+    public ResponseEntity<GenericResponse<List<ProductDataResponse>>> fetchPopularActiveProduct() {
+        List<ProductDataResponse> activeProducts = productService.fetchPopularActiveProducts();
+
+        return new ResponseEntity<>(GenericResponse.<List<ProductDataResponse>>builder()
+                .statusCode(HttpStatus.OK.value())
+                .data(activeProducts)
+                .build(), HttpStatus.OK);
+    }
+
     @GetMapping(value = "/fetch/{vendorId}")
     public ResponseEntity<GenericResponse<List<ProductDataResponse>>> fetchActiveProductsByVendor
             (@PathVariable(value = "vendorId") Long vendorId) {

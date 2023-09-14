@@ -26,6 +26,11 @@ public class CustomerDataDaoImpl implements CustomerDataDao {
     }
 
     @Override
+    public Optional<CustomerEntity> findCustomerByEmail(String email) {
+        return customerDataRepository.findByEmail(email);
+    }
+
+    @Override
     public CustomerEntity findCustomerByReferenceId(String customerReferenceId) {
         Optional<CustomerEntity> customer = customerDataRepository.findByReferenceId(customerReferenceId);
 

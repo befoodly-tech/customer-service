@@ -10,8 +10,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
-@RequestMapping("/v1")
+@RequestMapping("/v1/address")
 @RequiredArgsConstructor
 @CrossOrigin("http://localhost:5173")
 public class AddressController {
@@ -19,18 +21,18 @@ public class AddressController {
     @Autowired
     private final AddressService addressService;
 
-    @PostMapping("/address/{customerReferenceId}")
-    public ResponseEntity<GenericResponse<String>> addAddress(@PathVariable(value = "customerReferenceId") String customerReferenceId,
+    @PostMapping("/{customerReferenceId}")
+    public ResponseEntity<GenericResponse<AddressEntity>> addAddress(@PathVariable(value = "customerReferenceId") String customerReferenceId,
                                                               @RequestBody AddressCreateRequest request) {
-        String referenceId = addressService.addAddress(customerReferenceId, request);
+        AddressEntity addressEntity = addressService.addAddress(customerReferenceId, request);
 
-        return new ResponseEntity<>(GenericResponse.<String>builder()
+        return new ResponseEntity<>(GenericResponse.<AddressEntity>builder()
                 .statusCode(HttpStatus.CREATED.value())
-                .data(referenceId)
+                .data(addressEntity)
                 .build(), HttpStatus.CREATED);
     }
 
-    @PutMapping("/address/edit/{customerReferenceId}")
+    @PutMapping("/edit/{customerReferenceId}")
     public ResponseEntity<GenericResponse<AddressEntity>> editAddress(@PathVariable(value = "customerReferenceId") String customerReferenceId,
                                                                       @RequestParam(value = "title") String title,
                                                                       @RequestBody AddressCreateRequest addressCreateRequest) {
@@ -42,11 +44,22 @@ public class AddressController {
                 .build(), HttpStatus.OK);
     }
 
-    @DeleteMapping("/address/delete/{customerReferenceId}")
+    @DeleteMapping("/delete/{customerReferenceId}")
     public ResponseEntity<?> deleteAddress(@PathVariable(value = "customerReferenceId") String customerReferenceId,
                                           @RequestParam(value = "title") String title){
         addressService.deleteAddress(customerReferenceId, title);
 
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
+    }
+
+    @GetMapping("/{customerReferenceId}")
+    public ResponseEntity<GenericResponse<List<AddressEntity>>> fetchAllAddressesForCustomer
+            (@PathVariable(value = "customerReferenceId") String customerReferenceId){
+        List<AddressEntity> addressEntityList = addressService.fetchAddressList(customerReferenceId);
+
+        return new ResponseEntity<>(GenericResponse.<List<AddressEntity>>builder()
+                .data(addressEntityList)
+                .statusCode(HttpStatus.OK.value())
+                .build(), HttpStatus.OK);
     }
 }

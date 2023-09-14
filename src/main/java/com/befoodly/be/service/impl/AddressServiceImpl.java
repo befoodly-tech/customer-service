@@ -29,8 +29,10 @@ public class AddressServiceImpl implements AddressService {
 
     private final CustomerDataDao customerDataDao;
 
+    private static String phoneNumber;
+
     @Override
-    public String addAddress(String customerReferenceId, AddressCreateRequest request) {
+    public AddressEntity addAddress(String customerReferenceId, AddressCreateRequest request) {
 
         try {
 
@@ -41,7 +43,7 @@ public class AddressServiceImpl implements AddressService {
                         .referenceId(UUID.randomUUID().toString())
                         .customerReferenceId(customerReferenceId)
                         .title(request.getTitle())
-                        .phoneNumber(request.getPhoneNumber())
+                        .phoneNumber(StringUtils.isNotEmpty(request.getPhoneNumber()) ? request.getPhoneNumber() : phoneNumber)
                         .addressFirst(request.getAddressFirst())
                         .addressSecond(StringUtils.isNotEmpty(request.getAddressSecond()) ? request.getAddressSecond() : "")
                         .pinCode(request.getPinCode())
@@ -57,7 +59,7 @@ public class AddressServiceImpl implements AddressService {
                     addressDataDao.save(newAddress);
                     log.info("saved the new address for customer id: {}", customerReferenceId);
 
-                    return newAddress.getReferenceId();
+                    return newAddress;
                 }
 
                 throw new DuplicationException("Already exist address with same title for customer");
@@ -89,7 +91,6 @@ public class AddressServiceImpl implements AddressService {
 
                 AddressEntity currentAddress = address.get();
                 currentAddress.setTitle(request.getTitle());
-                currentAddress.setPhoneNumber(request.getPhoneNumber());
                 currentAddress.setAddressFirst(request.getAddressFirst());
                 currentAddress.setAddressSecond(request.getAddressSecond());
                 currentAddress.setPinCode(request.getPinCode());
@@ -131,6 +132,24 @@ public class AddressServiceImpl implements AddressService {
         }
     }
 
+    @Override
+    public List<AddressEntity> fetchAddressList(String customerReferenceId) {
+        try {
+            List<AddressEntity> addressEntityList = addressDataDao.findAddressByCustomerId(customerReferenceId);
+
+            if (addressEntityList.isEmpty()) {
+                log.info("No Address Data present for customerId: {}", customerReferenceId);
+                throw new InvalidException("No Address Data Present!");
+            }
+
+            log.info("Fetched the list of address data for customer: {}", customerReferenceId);
+            return addressEntityList;
+        } catch (Exception e) {
+            log.error("Failed to fetch the list of addresses for customer id: {}, error: {}", customerReferenceId, e.getMessage());
+            throw e;
+        }
+    }
+
     private Boolean isCustomerExist(String customerReferenceId) {
         CustomerEntity customer = customerDataDao.findCustomerByReferenceId(customerReferenceId);
 
@@ -138,6 +157,7 @@ public class AddressServiceImpl implements AddressService {
             return false;
         }
 
+        this.phoneNumber = customer.getPhoneNumber();
         return true;
     }
 }

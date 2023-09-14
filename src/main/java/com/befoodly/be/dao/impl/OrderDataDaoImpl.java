@@ -41,4 +41,9 @@ public class OrderDataDaoImpl implements OrderDataDao {
     public List<OrderEntity> findAllPlacedOrderDetails(String customerReferenceId) {
         return orderRepository.findByCustomerReferenceIdAndStatus(customerReferenceId, OrderStatus.PLACED);
     }
+
+    @Override
+    public Optional<OrderEntity> findOrderDetailsById(Long id) {
+        return orderRepository.findById(id);
+    }
 }

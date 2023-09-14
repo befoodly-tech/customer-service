@@ -37,4 +37,9 @@ public class AddressDataDaoImpl implements AddressDataDao {
     public void deleteAddress(String customerId, String title) {
         addressDataRepository.deleteByCustomerReferenceIdAndTitle(customerId, title);
     }
+
+    @Override
+    public Optional<AddressEntity> findAddressById(Long id) {
+        return addressDataRepository.findById(id);
+    }
 }

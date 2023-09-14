@@ -70,6 +70,13 @@ public class CustomerServiceImpl implements CustomerService {
             }
 
             if (StringUtils.isNotEmpty(request.getEmail())) {
+                Optional<CustomerEntity> customer1 = customerDataDao.findCustomerByEmail(request.getEmail());
+
+                if (customer1.isPresent()) {
+                    log.info("This email id is already registered!");
+                    throw new InvalidException("This Email is already registered!");
+                }
+
                 customer.setEmail(request.getEmail());
             }
 

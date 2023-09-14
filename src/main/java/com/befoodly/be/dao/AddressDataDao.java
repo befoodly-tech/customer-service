@@ -13,4 +13,6 @@ public interface AddressDataDao {
     Optional<AddressEntity> findAddressByCustomerIdAndTitle(String customerId, String title);
 
     void deleteAddress(String customerId, String title);
+
+    Optional<AddressEntity> findAddressById(Long id);
 }

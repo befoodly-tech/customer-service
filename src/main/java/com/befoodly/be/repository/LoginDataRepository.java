@@ -17,4 +17,8 @@ public interface LoginDataRepository extends JpaRepository<LoginDataEntity, Long
     Optional<LoginDataEntity> findByPhoneNumberAndAppPlatform(String phoneNumber, AppPlatform appPlatform);
 
     Optional<LoginDataEntity> findByPhoneNumberAndAppPlatformAndIsExpired(String phoneNumber, AppPlatform appPlatform, Boolean isExpired);
+
+    Optional<LoginDataEntity> findBySessionTokenAndAppPlatformAndIsExpired(String sessionToken, AppPlatform appPlatform, Boolean isExpired);
+
+    Optional<LoginDataEntity> findBySessionTokenAndAppPlatform(String sessionToken, AppPlatform appPlatform);
 }

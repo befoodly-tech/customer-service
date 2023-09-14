@@ -9,5 +9,7 @@ import lombok.Data;
 @AllArgsConstructor
 public class ProductList {
     Long productId;
+    String productName;
+    Double cost;
     Integer orderCount;
 }

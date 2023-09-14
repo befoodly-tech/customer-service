@@ -7,7 +7,7 @@ import lombok.Data;
 @Data
 @Builder
 @AllArgsConstructor
-public class DeliveryManList {
+public class DeliveryManData {
     String name;
     String phoneNumber;
 }

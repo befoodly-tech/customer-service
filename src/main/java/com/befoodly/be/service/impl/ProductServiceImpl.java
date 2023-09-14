@@ -13,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -68,6 +70,31 @@ public class ProductServiceImpl implements ProductService {
             return activeProductList;
         } catch (Exception e) {
             log.error("received error message: {} while fetching all active products", e.getMessage());
+            throw e;
+        }
+    }
+
+    @Override
+    public List<ProductDataResponse> fetchPopularActiveProducts() {
+        try {
+            List<ProductDataResponse> fetchedAllActiveProducts = fetchAllActiveProducts();
+            fetchedAllActiveProducts.sort(Comparator.comparing(ProductDataResponse::getOrderNo));
+
+            log.info("Successfully! fetched the trending product lists");
+
+            if (fetchedAllActiveProducts.size() <= 3) {
+                return fetchedAllActiveProducts;
+            }
+
+            List<ProductDataResponse> filterPopularProducts = new ArrayList<ProductDataResponse>();
+
+            for (int i = 0; i<3; i++) {
+                filterPopularProducts.add(fetchedAllActiveProducts.get(i));
+            }
+
+            return filterPopularProducts;
+        } catch (Exception e) {
+            log.error("Failed to fetch the list of trending products: {}", e.getMessage());
             throw e;
         }
     }

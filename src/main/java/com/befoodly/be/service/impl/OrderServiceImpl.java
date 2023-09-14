@@ -2,13 +2,13 @@ package com.befoodly.be.service.impl;
 
 import com.befoodly.be.dao.DeliveryDataDao;
 import com.befoodly.be.dao.OrderDataDao;
-import com.befoodly.be.entity.DeliveryBoyEntity;
 import com.befoodly.be.entity.DeliveryEntity;
 import com.befoodly.be.entity.OrderEntity;
 import com.befoodly.be.exception.throwable.InvalidException;
 import com.befoodly.be.model.ProductList;
 import com.befoodly.be.model.enums.DeliveryStatus;
 import com.befoodly.be.model.enums.OrderStatus;
+import com.befoodly.be.model.request.DeliveryOrderRequest;
 import com.befoodly.be.model.request.OrderRequest;
 import com.befoodly.be.model.response.OrderResponse;
 import com.befoodly.be.service.DeliveryBoyService;
@@ -44,6 +44,8 @@ public class OrderServiceImpl implements OrderService {
                 String getReferenceId = UUID.randomUUID().toString();
                 List<ProductList> productList = List.of(ProductList.builder()
                         .productId(orderRequest.getProductId())
+                        .productName(orderRequest.getProductName())
+                        .cost(orderRequest.getCost())
                         .orderCount(1).build());
 
                 OrderEntity orderEntity = OrderEntity.builder()
@@ -66,6 +68,8 @@ public class OrderServiceImpl implements OrderService {
                 if (existingProductId.isEmpty()) {
                     ProductList newProductItem = ProductList.builder()
                             .productId(orderRequest.getProductId())
+                            .productName(orderRequest.getProductName())
+                            .cost(orderRequest.getCost())
                             .orderCount(1).build();
 
                     currentProductList.add(newProductItem);
@@ -166,7 +170,7 @@ public class OrderServiceImpl implements OrderService {
 
             if (orderEntity.isEmpty()) {
                 log.info("No pending order found for the customer id: {}", customerReferenceId);
-                throw new InvalidException("No pending order found for the customer!");
+                return null;
             }
 
             OrderEntity currentOrderEntity = orderEntity.get();
@@ -183,7 +187,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public OrderResponse placeOrRemovePendingOrder(String customerReferenceId, OrderStatus status) {
+    public OrderResponse updateOrderDetails(String customerReferenceId, OrderStatus status) {
         try {
             Optional<OrderEntity> findPendingOrder = orderDataDao.findAllPendingOrderDetails(customerReferenceId);
 
@@ -196,24 +200,6 @@ public class OrderServiceImpl implements OrderService {
 
             if (ObjectUtils.isNotEmpty(status)) {
                 currentOrderEntity.setStatus(status);
-
-                if (OrderStatus.PLACED.equals(status)) {
-                    String referenceId = UUID.randomUUID().toString();
-                    DeliveryBoyEntity deliveryBoyEntity = deliveryBoyService.fetchAvailableDeliveryBoy();
-
-                    DeliveryEntity deliveryEntity = DeliveryEntity.builder()
-                            .referenceId(referenceId)
-                            .name(deliveryBoyEntity.getName())
-                            .phoneNumber(deliveryBoyEntity.getPhoneNumber())
-                            .orderId(currentOrderEntity.getId())
-                            .totalCost(currentOrderEntity.getTotalCost())
-                            .status(DeliveryStatus.INITIATED)
-                            .build();
-
-                    deliveryDataDao.save(deliveryEntity);
-                    log.info("Order id: {} for customer: {} is placed successfully!", currentOrderEntity.getId(),
-                            customerReferenceId);
-                }
             }
 
             orderDataDao.save(currentOrderEntity);
@@ -226,13 +212,71 @@ public class OrderServiceImpl implements OrderService {
         }
     }
 
+    @Override
+    public Long placeYourOrderForDelivery(String customerReferenceId, DeliveryOrderRequest request) {
+        try {
+            Optional<OrderEntity> findPendingOrder = orderDataDao.findAllPendingOrderDetails(customerReferenceId);
+
+            if (findPendingOrder.isEmpty()) {
+                log.info("No pending order present for customer id: {}", customerReferenceId);
+                throw new InvalidException("No pending order present for customer!");
+            }
+
+            OrderEntity currentOrderEntity = findPendingOrder.get();
+            currentOrderEntity.setStatus(OrderStatus.PLACED);
+
+            String referenceId = UUID.randomUUID().toString();
+
+            DeliveryEntity deliveryEntity = DeliveryEntity.builder()
+                    .referenceId(referenceId)
+                    .customerReferenceId(customerReferenceId)
+                    .orderId(currentOrderEntity.getId())
+                    .addressId(request.getAddressId())
+                    .couponId(request.getCouponId())
+                    .finalCost(request.getFinalCost())
+                    .deliveryCost(request.getDeliveryCost())
+                    .discountAmount(request.getDiscountAmount())
+                    .status(DeliveryStatus.INITIATED)
+                    .description(request.getDescription())
+                    .build();
+
+            deliveryDataDao.save(deliveryEntity);
+            orderDataDao.save(currentOrderEntity);
+            log.info("Order id: {} for customer: {} is placed successfully!", currentOrderEntity.getId(),
+                    customerReferenceId);
+
+            return deliveryEntity.getId();
+        } catch (Exception e) {
+            log.error("Received error: {} while placing order for customer: {}", e.getMessage(), customerReferenceId);
+            throw e;
+        }
+    }
+
+    @Override
+    public OrderResponse fetchOrderDetails(Long orderId) {
+        try {
+            Optional<OrderEntity> orderEntity = orderDataDao.findOrderDetailsById(orderId);
+
+            if (orderEntity.isEmpty()) {
+                log.info("No order found with order id: {}", orderId);
+                throw new InvalidException("No order found with order id!");
+            }
+
+            OrderResponse orderData = mapToOrderResponse(orderEntity.get());
+            log.info("Successfully, fetched the order details with the id: {}", orderId);
+
+            return orderData;
+        } catch (Exception e) {
+            log.error("Received an error: {} for order id: {}", e.getMessage(), orderId);
+            throw e;
+        }
+    }
+
     private OrderResponse mapToOrderResponse(OrderEntity orderEntity) {
         return OrderResponse.builder()
                 .id(orderEntity.getId())
                 .referenceId(orderEntity.getReferenceId())
-                .customerReferenceId(orderEntity.getCustomerReferenceId())
                 .productList(JacksonUtils.stringToListObject(orderEntity.getProductList(), ProductList.class))
-                .status(orderEntity.getStatus())
                 .totalCost(orderEntity.getTotalCost())
                 .createdAt(orderEntity.getCreatedAt())
                 .updatedAt(orderEntity.getUpdatedAt())

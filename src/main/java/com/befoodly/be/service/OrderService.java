@@ -1,6 +1,7 @@
 package com.befoodly.be.service;
 
 import com.befoodly.be.model.enums.OrderStatus;
+import com.befoodly.be.model.request.DeliveryOrderRequest;
 import com.befoodly.be.model.request.OrderRequest;
 import com.befoodly.be.model.response.OrderResponse;
 
@@ -14,5 +15,9 @@ public interface OrderService {
 
     OrderResponse fetchAllPendingOrders(String customerReferenceId);
 
-    OrderResponse placeOrRemovePendingOrder(String customerReferenceId, OrderStatus status);
+    OrderResponse updateOrderDetails(String customerReferenceId, OrderStatus status);
+
+    Long placeYourOrderForDelivery(String customerReferenceId, DeliveryOrderRequest request);
+
+    OrderResponse fetchOrderDetails(Long orderId);
 }

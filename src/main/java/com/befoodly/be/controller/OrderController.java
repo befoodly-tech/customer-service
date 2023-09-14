@@ -1,6 +1,7 @@
 package com.befoodly.be.controller;
 
 import com.befoodly.be.model.enums.OrderStatus;
+import com.befoodly.be.model.request.DeliveryOrderRequest;
 import com.befoodly.be.model.request.OrderRequest;
 import com.befoodly.be.model.response.GenericResponse;
 import com.befoodly.be.model.response.OrderResponse;
@@ -45,7 +46,7 @@ public class OrderController {
     @PutMapping("/update-cart/{customerReferenceId}")
     public ResponseEntity<GenericResponse<OrderResponse>> updateStatusOfCart(@PathVariable(value = "customerReferenceId") String customerReferenceId,
                                                                              @RequestParam(value = "status") OrderStatus status) {
-        OrderResponse orderResponse = orderService.placeOrRemovePendingOrder(customerReferenceId, status);
+        OrderResponse orderResponse = orderService.updateOrderDetails(customerReferenceId, status);
 
         return new ResponseEntity<>(GenericResponse.<OrderResponse>builder()
                 .statusCode(HttpStatus.OK.value())
@@ -59,6 +60,27 @@ public class OrderController {
 
         return new ResponseEntity<>(GenericResponse.<OrderResponse>builder()
                 .data(orderList)
+                .statusCode(HttpStatus.OK.value())
+                .build(), HttpStatus.OK);
+    }
+
+    @PostMapping("/confirm/{customerReferenceId}")
+    public ResponseEntity<GenericResponse<?>> placeOrderForCustomer(@PathVariable(value = "customerReferenceId") String customerReferenceId,
+                                                                    @RequestBody DeliveryOrderRequest request) {
+        Long deliveryId = orderService.placeYourOrderForDelivery(customerReferenceId, request);
+
+        return new ResponseEntity<>(GenericResponse.builder()
+                .data(deliveryId)
+                .statusCode(HttpStatus.OK.value())
+                .build(), HttpStatus.ACCEPTED);
+    }
+
+    @GetMapping("/order-details/{orderId}")
+    public ResponseEntity<GenericResponse<OrderResponse>> fetchOrderDetails(@PathVariable(value = "orderId") Long orderId) {
+        OrderResponse orderResponse = orderService.fetchOrderDetails(orderId);
+
+        return new ResponseEntity<>(GenericResponse.<OrderResponse>builder()
+                .data(orderResponse)
                 .statusCode(HttpStatus.OK.value())
                 .build(), HttpStatus.OK);
     }
