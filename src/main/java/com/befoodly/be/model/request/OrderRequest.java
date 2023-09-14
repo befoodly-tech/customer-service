@@ -9,5 +9,6 @@ import lombok.Data;
 @AllArgsConstructor
 public class OrderRequest {
     Long productId;
+    String productName;
     Double cost;
 }

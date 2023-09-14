@@ -10,6 +10,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.experimental.SuperBuilder;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 @Data
 @Entity
@@ -25,16 +26,28 @@ public class DeliveryEntity extends BaseEntity{
     String referenceId;
 
     @Column(nullable = false)
-    String name;
+    String customerReferenceId;
 
-    @Column(nullable = false)
-    String phoneNumber;
+    Long deliveryBoyId;
 
     @Column(nullable = false)
     Long orderId;
 
-    Double totalCost;
+    @Column(nullable = false)
+    Long addressId;
+
+    Long couponId;
+
+    Double finalCost;
+
+    Double deliveryCost;
+
+    Double discountAmount;
 
     @Enumerated(EnumType.STRING)
     DeliveryStatus status;
+
+    LocalDateTime deliveryTime;
+
+    String description;
 }

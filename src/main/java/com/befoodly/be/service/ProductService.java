@@ -8,5 +8,6 @@ import java.util.List;
 public interface ProductService {
     void createNewProduct(ProductCreateRequest request);
     List<ProductDataResponse> fetchAllActiveProducts();
+    List<ProductDataResponse> fetchPopularActiveProducts();
     List<ProductDataResponse> fetchActiveProductsByVendor(Long vendorId);
 }

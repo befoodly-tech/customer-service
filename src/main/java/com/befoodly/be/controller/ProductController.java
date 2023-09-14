@@ -15,6 +15,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/v1/product")
 @RequiredArgsConstructor
+@CrossOrigin("http://localhost:5173")
 public class ProductController {
 
     @Autowired
@@ -30,6 +31,16 @@ public class ProductController {
     @GetMapping(value = "/fetch/all")
     public ResponseEntity<GenericResponse<List<ProductDataResponse>>> fetchAllActiveProduct() {
         List<ProductDataResponse> activeProducts = productService.fetchAllActiveProducts();
+
+        return new ResponseEntity<>(GenericResponse.<List<ProductDataResponse>>builder()
+                .statusCode(HttpStatus.OK.value())
+                .data(activeProducts)
+                .build(), HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/fetch/popular")
+    public ResponseEntity<GenericResponse<List<ProductDataResponse>>> fetchPopularActiveProduct() {
+        List<ProductDataResponse> activeProducts = productService.fetchPopularActiveProducts();
 
         return new ResponseEntity<>(GenericResponse.<List<ProductDataResponse>>builder()
                 .statusCode(HttpStatus.OK.value())

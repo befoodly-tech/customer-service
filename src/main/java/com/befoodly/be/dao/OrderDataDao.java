@@ -10,4 +10,5 @@ public interface OrderDataDao {
     List<OrderEntity> findOrderDetails(String customerReferenceId);
     Optional<OrderEntity> findAllPendingOrderDetails(String customerReferenceId);
     List<OrderEntity> findAllPlacedOrderDetails(String customerReferenceId);
+    Optional<OrderEntity> findOrderDetailsById(Long id);
 }

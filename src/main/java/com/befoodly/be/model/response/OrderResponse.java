@@ -15,9 +15,7 @@ import java.util.List;
 public class OrderResponse {
     Long id;
     String referenceId;
-    String customerReferenceId;
     List<ProductList> productList;
-    OrderStatus status;
     Double totalCost;
     LocalDateTime createdAt;
     LocalDateTime updatedAt;

@@ -15,4 +15,8 @@ public interface LoginDataDao {
     Optional<LoginDataEntity> findLastLoggedInUser(String phoneNumber, AppPlatform appPlatform);
 
     Optional<LoginDataEntity> findActiveUserByPhoneNumber(String phoneNumber, AppPlatform appPlatform);
+
+    Optional<LoginDataEntity> findActiveUserBySessionToken(String sessionToken, AppPlatform appPlatform);
+
+    Optional<LoginDataEntity> findLoggedInDetailBySession(String sessionToken, AppPlatform appPlatform);
 }
