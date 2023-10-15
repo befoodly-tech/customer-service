@@ -33,10 +33,9 @@ public class DeliveryController {
 
     @GetMapping("/available-slots")
     public ResponseEntity<GenericResponse<List<TimeSlot>>> fetchAvailableTimeSlots() {
-        List<TimeSlot> availableDeliverySlots = deliveryService.fetchAvailableTimeSlots();
 
         return new ResponseEntity<>(GenericResponse.<List<TimeSlot>>builder()
-                .data(availableDeliverySlots)
+                .data(deliveryService.fetchAvailableTimeSlots())
                 .statusCode(HttpStatus.OK.value())
                 .build(), HttpStatus.OK);
     }

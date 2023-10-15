@@ -60,7 +60,7 @@ public class ProductController {
                 .build(), HttpStatus.OK);
     }
 
-    @PutMapping(value = "/update/{productId}")
+    @PutMapping(value = "/{productId}")
     public ResponseEntity<GenericResponse<?>> updateProductDetails (@PathVariable(value = "productId") Long productId,
                                                                     @RequestBody ProductEditRequest request) {
         productService.updateProductDetails(productId, request);

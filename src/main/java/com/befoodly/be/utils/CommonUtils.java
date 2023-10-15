@@ -29,11 +29,4 @@ public class CommonUtils {
 
         return currentAddress;
     }
-
-    public static LocalDateTime convertTimeToLocalDateTime (TimeSlot timeSlot) {
-        LocalDate localDate = LocalDate.now();
-        LocalTime localTime = LocalTime.of(timeSlot.getHour(), timeSlot.getMinutes());
-
-        return localDate.atTime(localTime);
-    }
 }
