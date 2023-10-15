@@ -15,7 +15,7 @@ import java.util.List;
 @RestController
 @RequestMapping("v1/cook")
 @RequiredArgsConstructor
-@CrossOrigin("http://localhost:5173")
+@CrossOrigin("*")
 public class CookController {
 
     @Autowired

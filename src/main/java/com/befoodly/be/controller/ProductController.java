@@ -1,6 +1,7 @@
 package com.befoodly.be.controller;
 
 import com.befoodly.be.model.request.ProductCreateRequest;
+import com.befoodly.be.model.request.ProductEditRequest;
 import com.befoodly.be.model.response.GenericResponse;
 import com.befoodly.be.model.response.ProductDataResponse;
 import com.befoodly.be.service.ProductService;
@@ -15,7 +16,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/v1/product")
 @RequiredArgsConstructor
-@CrossOrigin("http://localhost:5173")
+@CrossOrigin("*")
 public class ProductController {
 
     @Autowired
@@ -56,6 +57,17 @@ public class ProductController {
         return new ResponseEntity<>(GenericResponse.<List<ProductDataResponse>>builder()
                 .statusCode(HttpStatus.OK.value())
                 .data(activeProducts)
+                .build(), HttpStatus.OK);
+    }
+
+    @PutMapping(value = "/{productId}")
+    public ResponseEntity<GenericResponse<?>> updateProductDetails (@PathVariable(value = "productId") Long productId,
+                                                                    @RequestBody ProductEditRequest request) {
+        productService.updateProductDetails(productId, request);
+
+        return new ResponseEntity<>(GenericResponse.builder()
+                .statusCode(HttpStatus.OK.value())
+                .data("Updated!")
                 .build(), HttpStatus.OK);
     }
 }

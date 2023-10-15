@@ -7,4 +7,5 @@ import java.util.List;
 public interface DeliveryDataDao {
     void save(DeliveryEntity deliveryEntity);
     List<DeliveryEntity> fetchPendingDeliveryDetails(String customerReferenceId);
+    List<DeliveryEntity> fetchAllPendingDeliveryDetails();
 }
