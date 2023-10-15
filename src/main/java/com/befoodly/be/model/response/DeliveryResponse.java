@@ -22,5 +22,6 @@ public class DeliveryResponse {
     DeliveryManData deliveryManData;
     AddressEntity deliveryAddress;
     LocalDateTime deliveryTime;
+    LocalDateTime orderTime;
     String description;
 }

@@ -2,10 +2,13 @@ package com.befoodly.be.service.impl;
 
 import com.befoodly.be.dao.ProductDataDao;
 import com.befoodly.be.entity.ProductEntity;
+import com.befoodly.be.exception.throwable.InvalidException;
+import com.befoodly.be.exception.throwable.NotAvailableException;
 import com.befoodly.be.model.Feedback;
 import com.befoodly.be.model.ProductProvider;
 import com.befoodly.be.model.enums.ProductStatus;
 import com.befoodly.be.model.request.ProductCreateRequest;
+import com.befoodly.be.model.request.ProductEditRequest;
 import com.befoodly.be.model.response.ProductDataResponse;
 import com.befoodly.be.service.ProductService;
 import com.befoodly.be.utils.JacksonUtils;
@@ -13,10 +16,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.UUID;
+import java.io.NotActiveException;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -112,6 +113,33 @@ public class ProductServiceImpl implements ProductService {
             return activeProductList;
         } catch (Exception e) {
             log.error("Received error: {} while fetch product data for vendor id: {}", e.getMessage(), vendorId);
+            throw e;
+        }
+    }
+
+    @Override
+    public void updateProductDetails(Long productId, ProductEditRequest request) {
+        try {
+            Optional<ProductEntity> productEntityOptional = productDataDao.findProductByProductId(productId);
+
+            if (productEntityOptional.isEmpty()) {
+                log.info("No product found with product id: {}", productId);
+                throw new InvalidException("Invalid product Id!");
+            }
+
+            ProductEntity productEntity = productEntityOptional.get();
+            Integer currentOrderNo = productEntity.getOrderNo();
+
+            if (request.getOrderNo() <= currentOrderNo) {
+                productEntity.setOrderNo(currentOrderNo - request.getOrderNo());
+            } else {
+                log.info("Not enough orders left for product id: {}", productId);
+                throw new NotAvailableException("Ordered quantity is not available!");
+            }
+
+            productDataDao.save(productEntity);
+        } catch (Exception e) {
+            log.error("Failed to update the product details with error: {} for product id: {}", e.getMessage(), productId);
             throw e;
         }
     }

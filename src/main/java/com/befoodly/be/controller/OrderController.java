@@ -17,7 +17,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/v1/order")
 @RequiredArgsConstructor
-@CrossOrigin("http://localhost:5173")
+@CrossOrigin("*")
 public class OrderController {
 
     @Autowired

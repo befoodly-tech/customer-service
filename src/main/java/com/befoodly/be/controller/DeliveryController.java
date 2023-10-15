@@ -1,5 +1,6 @@
 package com.befoodly.be.controller;
 
+import com.befoodly.be.model.TimeSlot;
 import com.befoodly.be.model.response.DeliveryResponse;
 import com.befoodly.be.model.response.GenericResponse;
 import com.befoodly.be.service.DeliveryService;
@@ -14,7 +15,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/v1/delivery")
 @RequiredArgsConstructor
-@CrossOrigin("http://localhost:5173")
+@CrossOrigin("*")
 public class DeliveryController {
 
     @Autowired
@@ -26,6 +27,16 @@ public class DeliveryController {
 
         return new ResponseEntity<>(GenericResponse.<List<DeliveryResponse>>builder()
                 .data(deliveryDetails)
+                .statusCode(HttpStatus.OK.value())
+                .build(), HttpStatus.OK);
+    }
+
+    @GetMapping("/available-slots")
+    public ResponseEntity<GenericResponse<List<TimeSlot>>> fetchAvailableTimeSlots() {
+        List<TimeSlot> availableDeliverySlots = deliveryService.fetchAvailableTimeSlots();
+
+        return new ResponseEntity<>(GenericResponse.<List<TimeSlot>>builder()
+                .data(availableDeliverySlots)
                 .statusCode(HttpStatus.OK.value())
                 .build(), HttpStatus.OK);
     }

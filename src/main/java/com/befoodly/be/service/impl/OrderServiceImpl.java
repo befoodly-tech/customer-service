@@ -10,9 +10,12 @@ import com.befoodly.be.model.enums.DeliveryStatus;
 import com.befoodly.be.model.enums.OrderStatus;
 import com.befoodly.be.model.request.DeliveryOrderRequest;
 import com.befoodly.be.model.request.OrderRequest;
+import com.befoodly.be.model.request.ProductEditRequest;
 import com.befoodly.be.model.response.OrderResponse;
 import com.befoodly.be.service.DeliveryBoyService;
 import com.befoodly.be.service.OrderService;
+import com.befoodly.be.service.ProductService;
+import com.befoodly.be.utils.CommonUtils;
 import com.befoodly.be.utils.JacksonUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -33,6 +36,8 @@ public class OrderServiceImpl implements OrderService {
     private final DeliveryDataDao deliveryDataDao;
 
     private final DeliveryBoyService deliveryBoyService;
+
+    private final ProductService productService;
 
     @Override
     public void addOrderToCart(String customerReferenceId, OrderRequest orderRequest) {
@@ -144,10 +149,6 @@ public class OrderServiceImpl implements OrderService {
 
                 currentOrderEntity.setTotalCost(Math.floor(newTotalCost));
                 currentOrderEntity.setProductList(JacksonUtils.objectToString(currentProductList));
-
-                if (currentProductList.isEmpty()) {
-                    currentOrderEntity.setStatus(OrderStatus.REMOVED);
-                }
             }
 
             orderDataDao.save(currentOrderEntity);
@@ -225,6 +226,9 @@ public class OrderServiceImpl implements OrderService {
             OrderEntity currentOrderEntity = findPendingOrder.get();
             currentOrderEntity.setStatus(OrderStatus.PLACED);
 
+            List<ProductList> productList = JacksonUtils.stringToListObject(currentOrderEntity.getProductList(), ProductList.class);
+            updateProductOrderCount(productList);
+
             String referenceId = UUID.randomUUID().toString();
 
             DeliveryEntity deliveryEntity = DeliveryEntity.builder()
@@ -235,8 +239,9 @@ public class OrderServiceImpl implements OrderService {
                     .couponId(request.getCouponId())
                     .finalCost(request.getFinalCost())
                     .deliveryCost(request.getDeliveryCost())
+                    .deliveryTime(request.getDeliverySlot())
                     .discountAmount(request.getDiscountAmount())
-                    .status(DeliveryStatus.INITIATED)
+                    .status(DeliveryStatus.PENDING)
                     .description(request.getDescription())
                     .build();
 
@@ -250,6 +255,14 @@ public class OrderServiceImpl implements OrderService {
             log.error("Received error: {} while placing order for customer: {}", e.getMessage(), customerReferenceId);
             throw e;
         }
+    }
+
+    private void updateProductOrderCount(List<ProductList> productList) {
+        productList.forEach(productList1 -> productService.updateProductDetails(
+                productList1.getProductId(),
+                ProductEditRequest.builder()
+                        .orderNo(productList1.getOrderCount())
+                        .build()));
     }
 
     @Override

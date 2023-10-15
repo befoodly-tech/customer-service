@@ -3,7 +3,6 @@ package com.befoodly.be.repository;
 import com.befoodly.be.entity.LoginDataEntity;
 import com.befoodly.be.model.enums.AppPlatform;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;

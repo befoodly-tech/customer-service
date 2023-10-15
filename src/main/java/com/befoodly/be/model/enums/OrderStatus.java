@@ -1,5 +1,5 @@
 package com.befoodly.be.model.enums;
 
 public enum OrderStatus {
-    PENDING, PLACED, COMPLETED, FAILED, REMOVED
+    PENDING, PLACED, COMPLETED, FAILED, EMPTY
 }

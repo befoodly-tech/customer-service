@@ -16,7 +16,7 @@ import static com.befoodly.be.model.constant.CommonConstants.CUSTOMER_ID;
 @RestController
 @RequestMapping("/v1/customer")
 @RequiredArgsConstructor
-@CrossOrigin("http://localhost:5173")
+@CrossOrigin("*")
 public class CustomerController {
 
     @Autowired

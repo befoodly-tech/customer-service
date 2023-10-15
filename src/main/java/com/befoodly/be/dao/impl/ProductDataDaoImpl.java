@@ -9,6 +9,7 @@ import lombok.NonNull;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Optional;
 
 @Component
 @AllArgsConstructor
@@ -29,6 +30,11 @@ public class ProductDataDaoImpl implements ProductDataDao {
     @Override
     public List<ProductEntity> findActiveProductByVendorId(Long vendorId) {
         return productDataRepository.findByStatusAndVendorId(ProductStatus.ACTIVE, vendorId);
+    }
+
+    @Override
+    public Optional<ProductEntity> findProductByProductId(Long productId) {
+        return productDataRepository.findById(productId);
     }
 
 

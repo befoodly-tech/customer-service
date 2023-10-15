@@ -1,8 +1,12 @@
 package com.befoodly.be.utils;
 
+import com.befoodly.be.model.TimeSlot;
 import com.befoodly.be.model.request.AddressCreateRequest;
 import org.apache.commons.lang3.StringUtils;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Random;
 
 public class CommonUtils {
@@ -24,5 +28,12 @@ public class CommonUtils {
         currentAddress += ", " + request.getState();
 
         return currentAddress;
+    }
+
+    public static LocalDateTime convertTimeToLocalDateTime (TimeSlot timeSlot) {
+        LocalDate localDate = LocalDate.now();
+        LocalTime localTime = LocalTime.of(timeSlot.getHour(), timeSlot.getMinutes());
+
+        return localDate.atTime(localTime);
     }
 }

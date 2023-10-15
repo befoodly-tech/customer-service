@@ -2,6 +2,7 @@ package com.befoodly.be.exception;
 
 import com.befoodly.be.exception.throwable.DuplicationException;
 import com.befoodly.be.exception.throwable.InvalidException;
+import com.befoodly.be.exception.throwable.NotAvailableException;
 import com.befoodly.be.model.response.GenericResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -36,6 +37,15 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
         return GenericResponse.builder()
                 .errorMessage(invalidException.getMessage())
                 .statusCode(HttpStatus.BAD_REQUEST.value())
+                .build();
+    }
+
+    @ExceptionHandler(NotAvailableException.class)
+    @ResponseStatus(HttpStatus.OK)
+    public GenericResponse<?> notAvailableHandler(NotAvailableException notAvailableException) {
+        return GenericResponse.builder()
+                .errorMessage(notAvailableException.getMessage())
+                .statusCode(HttpStatus.NOT_ACCEPTABLE.value())
                 .build();
     }
 }

@@ -18,7 +18,7 @@ import static com.befoodly.be.model.constant.HeaderConstants.HEADER_PLATFORM;
 @RestController
 @RequestMapping("/v1")
 @RequiredArgsConstructor
-@CrossOrigin("http://localhost:5173")
+@CrossOrigin("*")
 public class LoginController {
 
     @Autowired
