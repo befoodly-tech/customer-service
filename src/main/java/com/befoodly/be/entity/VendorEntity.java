@@ -18,7 +18,7 @@ import javax.persistence.*;
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Table(name = "vendor_data")
+@Table(name = "vendor")
 public class VendorEntity extends BaseEntity{
 
     @Column(nullable = false, unique = true)

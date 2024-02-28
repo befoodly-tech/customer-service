@@ -18,7 +18,6 @@ import java.util.List;
 @CrossOrigin("*")
 public class CookController {
 
-    @Autowired
     private final CookService cookService;
 
     @PostMapping(value = "/create")

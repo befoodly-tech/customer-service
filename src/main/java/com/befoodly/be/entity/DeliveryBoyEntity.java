@@ -1,7 +1,6 @@
 package com.befoodly.be.entity;
 
 import com.befoodly.be.model.enums.DeliveryBoyStatus;
-import com.befoodly.be.model.request.AddressCreateRequest;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -19,7 +18,7 @@ import javax.persistence.*;
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Table(name = "delivery_boy_data")
+@Table(name = "delivery_boy")
 public class DeliveryBoyEntity extends BaseEntity {
 
     @Column(nullable = false)

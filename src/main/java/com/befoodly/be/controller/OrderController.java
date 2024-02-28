@@ -20,7 +20,6 @@ import java.util.Optional;
 @CrossOrigin("*")
 public class OrderController {
 
-    @Autowired
     private final OrderService orderService;
 
     @PostMapping("/add-to-cart/{customerReferenceId}")

@@ -2,7 +2,6 @@ package com.befoodly.be.dao.impl;
 
 import com.befoodly.be.dao.DeliveryDataDao;
 import com.befoodly.be.entity.DeliveryEntity;
-import com.befoodly.be.model.enums.DeliveryStatus;
 import com.befoodly.be.repository.DeliveryDataRepository;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;

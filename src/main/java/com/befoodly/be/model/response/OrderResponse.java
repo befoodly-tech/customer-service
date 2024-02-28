@@ -1,7 +1,6 @@
 package com.befoodly.be.model.response;
 
 import com.befoodly.be.model.ProductList;
-import com.befoodly.be.model.enums.OrderStatus;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Builder;
 import lombok.Data;

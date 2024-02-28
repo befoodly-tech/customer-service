@@ -19,7 +19,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Table(name = "delivery_data")
+@Table(name = "delivery")
 public class DeliveryEntity extends BaseEntity{
 
     @Column(nullable = false, unique = true)

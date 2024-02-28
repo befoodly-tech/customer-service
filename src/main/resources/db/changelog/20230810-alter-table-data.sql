@@ -2,7 +2,7 @@
 
 --changeset deepak:20230810
 
-ALTER TABLE product_data
+ALTER TABLE product
     ADD CONSTRAINT fk_product_data
     FOREIGN KEY (vendor_id)
-    REFERENCES vendor_data(id);
+    REFERENCES vendor(id);

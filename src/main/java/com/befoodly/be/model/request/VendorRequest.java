@@ -1,7 +1,6 @@
 package com.befoodly.be.model.request;
 
 import com.befoodly.be.model.Feedback;
-import com.befoodly.be.model.enums.VendorStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
