@@ -18,7 +18,6 @@ import java.util.List;
 @CrossOrigin("*")
 public class DeliveryController {
 
-    @Autowired
     private final DeliveryService deliveryService;
 
     @GetMapping("/pending-orders/{customerReferenceId}")

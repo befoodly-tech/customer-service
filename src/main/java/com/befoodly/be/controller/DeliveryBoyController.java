@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 @CrossOrigin("*")
 public class DeliveryBoyController {
 
-    @Autowired
     private final DeliveryBoyService deliveryBoyService;
 
     @PostMapping(value = "/create")

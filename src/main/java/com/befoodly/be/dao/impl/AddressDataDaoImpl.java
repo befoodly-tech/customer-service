@@ -1,8 +1,7 @@
 package com.befoodly.be.dao.impl;
 
-import com.befoodly.be.dao.AddressDataDao;
-import com.befoodly.be.entity.AddressEntity;
-import com.befoodly.be.repository.AddressDataRepository;
+import com.befoodly.be.entity.Address;
+import com.befoodly.be.repository.AddressRepository;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import org.springframework.stereotype.Component;
@@ -13,33 +12,28 @@ import java.util.Optional;
 
 @Component
 @AllArgsConstructor
-public class AddressDataDaoImpl implements AddressDataDao {
+public class AddressDataDaoImpl {
 
-    private final AddressDataRepository addressDataRepository;
+    private final AddressRepository addressRepository;
 
-    @Override
-    public void save(@NonNull AddressEntity addressEntity) {
-        addressDataRepository.saveAndFlush(addressEntity);
+    public void save(@NonNull Address address) {
+        addressRepository.saveAndFlush(address);
     }
 
-    @Override
-    public List<AddressEntity> findAddressByCustomerId(String customerId) {
-        return addressDataRepository.findByCustomerReferenceId(customerId);
+    public List<Address> findAddressByCustomerId(String customerId) {
+        return addressRepository.findByCustomerReferenceId(customerId);
     }
 
-    @Override
-    public Optional<AddressEntity> findAddressByCustomerIdAndTitle(String customerId, String title) {
-        return addressDataRepository.findByCustomerReferenceIdAndTitle(customerId, title);
+    public Optional<Address> findAddressByCustomerIdAndTitle(String customerId, String title) {
+        return addressRepository.findByCustomerReferenceIdAndTitle(customerId, title);
     }
 
-    @Override
     @Transactional
     public void deleteAddress(String customerId, String title) {
-        addressDataRepository.deleteByCustomerReferenceIdAndTitle(customerId, title);
+        addressRepository.deleteByCustomerReferenceIdAndTitle(customerId, title);
     }
 
-    @Override
-    public Optional<AddressEntity> findAddressById(Long id) {
-        return addressDataRepository.findById(id);
+    public Optional<Address> findAddressById(Long id) {
+        return addressRepository.findById(id);
     }
 }

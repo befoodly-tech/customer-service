@@ -19,8 +19,8 @@ import javax.persistence.Table;
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Table(name = "address_data")
-public class AddressEntity extends BaseEntity {
+@Table(name = "address")
+public class Address extends BaseEntity {
 
     @Column(nullable = false, unique = true)
     String referenceId;
@@ -47,5 +47,4 @@ public class AddressEntity extends BaseEntity {
 
     @Column(nullable = false)
     String state;
-
 }

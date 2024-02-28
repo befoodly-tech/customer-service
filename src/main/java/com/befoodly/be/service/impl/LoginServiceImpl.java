@@ -1,310 +1,163 @@
 package com.befoodly.be.service.impl;
 
 import com.befoodly.be.clients.AwsSnsClient;
-import com.befoodly.be.clients.Msg91EmailClient;
-import com.befoodly.be.dao.CustomerDataDao;
-import com.befoodly.be.dao.LoginDataDao;
-import com.befoodly.be.entity.CustomerEntity;
-import com.befoodly.be.entity.LoginDataEntity;
-import com.befoodly.be.exception.throwable.InvalidException;
+import com.befoodly.be.entity.AuthLog;
+import com.befoodly.be.entity.Customer;
+import com.befoodly.be.entity.RefreshToken;
 import com.befoodly.be.model.enums.AppPlatform;
-import com.befoodly.be.model.enums.ExpiryReason;
-import com.befoodly.be.model.request.CustomerCreateRequest;
-import com.befoodly.be.model.response.EmailLoginResponse;
-import com.befoodly.be.model.response.LoginResponse;
-import com.befoodly.be.service.CustomerService;
+import com.befoodly.be.model.request.GenerateOtpRequest;
+import com.befoodly.be.model.request.RefreshTokenRequest;
+import com.befoodly.be.model.request.VerifyOtpRequest;
+import com.befoodly.be.model.response.GenerateOtpResponse;
+import com.befoodly.be.model.response.RefreshTokenResponse;
+import com.befoodly.be.model.response.VerifyOtpResponse;
+import com.befoodly.be.repository.AuthLogRepository;
+import com.befoodly.be.repository.CustomerRepository;
+import com.befoodly.be.repository.RefreshTokenRepository;
 import com.befoodly.be.service.LoginService;
 import com.befoodly.be.utils.CommonUtils;
+import com.befoodly.be.utils.JwtUtil;
+import com.befoodly.be.utils.PhoneNumberValidatorUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
-import java.util.Optional;
+import java.time.LocalDateTime;
 import java.util.UUID;
-
-import static com.befoodly.be.model.constant.CommonConstants.*;
 
 @Service
 @Log4j2
 @RequiredArgsConstructor
 public class LoginServiceImpl implements LoginService {
-    private final LoginDataDao loginDataDao;
 
-    private final CustomerService customerService;
+    private final AuthLogRepository authLogRepository;
+    private final CustomerRepository customerRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
 
-    private final CustomerDataDao customerDataDao;
+    private final AuthenticationManager authenticationManager;
+    private final JwtUtil jwtTokenUtil;
+    private final UserDetailsService userDetailsService;
 
     private final AwsSnsClient awsSnsClient;
 
-    private final Msg91EmailClient msg91EmailClient;
+    private final static String COUNTRY_CODE = "91";
 
     @Override
     @Transactional
-    public EmailLoginResponse signUpUser(String phoneNumber, AppPlatform appPlatform) {
-
+    public GenerateOtpResponse generateOtp(GenerateOtpRequest request, AppPlatform appPlatform) {
         try {
-            if (StringUtils.isEmpty(phoneNumber)) {
-                return null;
+            if (!PhoneNumberValidatorUtil.isValidPhoneNumber(request.getPhoneNumber())) {
+                //TODO : Throw custom exception
+                throw new RuntimeException(" ");
             }
 
-            Optional<CustomerEntity> customerEntity = customerDataDao.findCustomerByPhoneNumber(phoneNumber);
+            String otp = CommonUtils.GenerateOtp();
 
-            if (customerEntity.isPresent()) {
-                log.info("Customer with phone number: {} already exist!", phoneNumber);
-                throw new InvalidException("This phone number is already registered!");
-            }
+            AuthLog authLog = AuthLog.builder().referenceId(UUID.randomUUID().toString()).otp(otp).phoneNumber(request.getPhoneNumber()).isValidated(false).validationAttempts(0).expirationTime(LocalDateTime.now().plusMinutes(15)).platform(appPlatform).build();
+            authLogRepository.saveAndFlush(authLog);
 
-            LoginDataEntity newLoginData = loginNewEntryInTable(phoneNumber, appPlatform);
+            String otpMessage = getOtpMessage(otp);
+            //awsSnsClient.sendOTPMessage(otpMessage, request.getPhoneNumber());
+            //TODO: Save to communication history
 
-            String otpMessage = getOtpMessage(newLoginData.getOtp());
-            awsSnsClient.sendOTPMessage(otpMessage, phoneNumberWithCode(phoneNumber));
-
-            loginDataDao.save(newLoginData);
-            log.info("Added the sign up details of user with number: {}", phoneNumber);
-
-            return EmailLoginResponse.builder()
-                    .sessionToken(newLoginData.getSessionToken())
-                    .phoneNumber(phoneNumber)
-                    .build();
+            log.info("Added the sign up details of user with number: {}", request.getPhoneNumber());
+            return GenerateOtpResponse.builder().otpReferenceId(authLog.getReferenceId()).phoneNumber(request.getPhoneNumber()).build();
 
         } catch (Exception e) {
-            log.error("Received error while sign in: {} with number: {}", e.getMessage(), phoneNumber);
+            log.error("Received error while generating otp for phone number: {}", request.getPhoneNumber(), e);
             throw e;
         }
     }
 
     @Override
-    public EmailLoginResponse loginUser(String email, AppPlatform appPlatform) {
-
+    @Transactional
+    public VerifyOtpResponse verifyOtp(VerifyOtpRequest request, AppPlatform appPlatform) {
         try {
-            Optional<CustomerEntity> customerEntity = customerDataDao.findCustomerByEmail(email);
+            AuthLog authLog = authLogRepository.findByReferenceId(request.getOtpReferenceId()).orElseThrow(() -> new RuntimeException(" ")); //TODO : Custom Exception
 
-            if (customerEntity.isEmpty()) {
-                log.info("Customer with email: {} not found!", email);
-                throw new InvalidException("No Customer registered with email!");
+            //TODO: Throw custom exceptions for each otp verification failing step
+            if (authLog.getOtp().equals(request.getOtp()) && (authLog.getExpirationTime().isAfter(LocalDateTime.now())) && !authLog.getIsValidated() && authLog.getValidationAttempts() < 3) {
+
+                log.info("OTP verified for phone number: {}", authLog.getPhoneNumber());
+
+                Customer customer = customerRepository.findByPhoneNumber(authLog.getPhoneNumber())
+                        .orElse(Customer.builder()
+                                .referenceId(UUID.randomUUID().toString())
+                                .externalReferenceId(UUID.randomUUID().toString())
+                                .phoneNumber(authLog.getPhoneNumber())
+                                .build());
+
+                RefreshToken refreshToken = RefreshToken.builder().isExpired(false).referenceId(UUID.randomUUID().toString()).referenceId(UUID.randomUUID().toString()).expirationTime(LocalDateTime.now().plusMinutes(259200)) //TODO: 6 months expiry, move to config
+                        .platform(appPlatform).build();
+                refreshTokenRepository.save(refreshToken);
+
+                return VerifyOtpResponse.builder()
+                        .customerReferenceId(customer.getReferenceId())
+                        .refreshToken(refreshToken.getReferenceId())
+                        .authToken(createAuthenticationToken(customer.getReferenceId()))
+                        .authType("Bearer ")
+                        .build();
+            } else {
+                throw new RuntimeException(" "); //TODO: Throw custom exceptions for each failing usecase
             }
-
-            CustomerEntity currentCustomer = customerEntity.get();
-            LoginDataEntity newLoginData = loginNewEntryInTable(currentCustomer.getPhoneNumber(), appPlatform);
-
-            msg91EmailClient.sendOTPMail(newLoginData.getOtp(), email);
-
-            loginDataDao.save(newLoginData);
-            log.info("Added the new login details of user with email: {}", email);
-
-            return EmailLoginResponse.builder()
-                    .phoneNumber(currentCustomer.getPhoneNumber())
-                    .sessionToken(newLoginData.getSessionToken())
-                    .build();
         } catch (Exception e) {
-            log.error("Received following error: {}, while logging in with email: {}", e.getMessage(), email);
-            throw e;
+            log.error("Received error while verifying otp for phone number: {}", request.getPhoneNumber(), e);
+            throw new RuntimeException(" ");
         }
+    }
+
+    public String createAuthenticationToken(String customerReferenceId) throws Exception {
+        try {
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(customerReferenceId, ""));
+        } catch (BadCredentialsException e) {
+            throw new Exception("Incorrect username or password", e);
+        }
+        final UserDetails userDetails = userDetailsService.loadUserByUsername(customerReferenceId);
+        return jwtTokenUtil.generateToken(userDetails);
+    }
+
+    @Override
+    @Transactional
+    public RefreshTokenResponse refreshToken(RefreshTokenRequest refreshTokenRequest, AppPlatform appPlatform) {
+        return refreshTokenRepository.findByReferenceId(refreshTokenRequest.getRefreshToken()).map(refreshToken -> {
+            if (refreshToken.isExpired()) {
+                throw new RuntimeException(" "); //TODO: Custom Exception
+            }
+            if (LocalDateTime.now().isAfter(refreshToken.getExpirationTime())) {
+                refreshToken.setExpired(true);
+                refreshTokenRepository.save(refreshToken);
+                throw new RuntimeException(" "); //TODO: Custom Exception
+            } else {
+                try {
+                    String authToken = createAuthenticationToken(refreshToken.getCustomerReferenceId());
+                    return RefreshTokenResponse.builder()
+                            .refreshToken(refreshTokenRequest.getRefreshToken())
+                            .authToken(authToken)
+                            .authType("Bearer ").build();
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }).orElseThrow(() -> new RuntimeException(" "));
+    }
+
+    //Lets allow user to login into multiple devices
+    @Override
+    @Transactional
+    public String logoutUser(String sessionToken, AppPlatform appPlatform) {
+        return "Logout successful!!";
     }
 
     private String getOtpMessage(String otp) {
         return "Hello! from BeFoodly, kindly verify your phone number with one-time password(OTP): " + otp;
     }
 
-    private LoginDataEntity loginNewEntryInTable(String phoneNumber, AppPlatform appPlatform) {
-        try {
-            Optional<LoginDataEntity> loginDataEntity = loginDataDao.findActiveUserByPhoneNumber(phoneNumber, appPlatform);
-
-            if (loginDataEntity.isPresent()) {
-                LoginDataEntity currentLoginData = loginDataEntity.get();
-                currentLoginData.setIsExpired(true);
-                currentLoginData.setExpiryReason(ExpiryReason.SESSION_EXPIRE);
-                loginDataDao.save(currentLoginData);
-            }
-
-            String referenceId = UUID.randomUUID().toString();
-            String sessionToken = UUID.randomUUID().toString();
-            String otp = CommonUtils.GenerateOtp();
-
-            LoginDataEntity addUserData = LoginDataEntity.builder()
-                    .referenceId(referenceId)
-                    .appPlatform(appPlatform)
-                    .sessionToken(sessionToken)
-                    .phoneNumber(phoneNumber)
-                    .isExpired(false)
-                    .otp(otp)
-                    .otpVerified(false)
-                    .build();
-
-            log.info("New entry created with reference id: {}", referenceId);
-
-            return addUserData;
-        } catch (Exception e) {
-            log.error("Received error: {} while adding new login entry for number: {}", e.getMessage(), phoneNumber);
-            throw e;
-        }
-    }
-
-    @Override
-    @Transactional
-    public String logoutUser(String sessionToken, AppPlatform appPlatform) {
-
-        try {
-            if (StringUtils.isEmpty(sessionToken)) {
-                return null;
-            }
-
-            Optional<LoginDataEntity> currentData = loginDataDao.findActiveUserBySessionToken(sessionToken, appPlatform);
-
-            if (currentData.isEmpty()) {
-                log.info("No active logged in data found for the session: {}", sessionToken);
-                throw new InvalidException("No active logged in user with this data!");
-            }
-
-            LoginDataEntity loginData = currentData.get();
-
-            loginData.setIsExpired(true);
-            loginData.setExpiryReason(ExpiryReason.LOGOUT);
-
-            loginDataDao.save(loginData);
-            log.info("Successfully! expired the session token for previous logged in user: {}", loginData.getPhoneNumber());
-
-            return SUCCESS_LOGOUT_MESSAGE;
-
-        } catch (Exception e) {
-            log.error("user logout for session: {} failed because of error: {}", sessionToken, e.getMessage());
-            throw e;
-        }
-    }
-
-    @Override
-    @Transactional
-    public LoginResponse otpVerification(String otp, String phoneNumber, AppPlatform appPlatform) {
-
-        try {
-            Optional<LoginDataEntity> currentData = loginDataDao.findActiveUserByPhoneNumber(phoneNumber, appPlatform);
-
-            if (currentData.isEmpty()) {
-                log.info("No active user found for number: {}", phoneNumber);
-                throw new InvalidException("No active data found with phone number!");
-            }
-
-            LoginDataEntity loginData = currentData.get();
-            String currentOtp = loginData.getOtp();
-
-            if (currentOtp.equals(otp) && !loginData.getOtpVerified()) {
-                loginData.setOtpVerified(true);
-                loginData.setOtp(null);
-
-                loginDataDao.save(loginData);
-                log.info("otp verification done for phoneNumber: {}", phoneNumber);
-
-                Optional<CustomerEntity> customerEntity = customerDataDao.findCustomerByPhoneNumber(phoneNumber);
-                LoginResponse loginResponse = LoginResponse.builder()
-                        .id(loginData.getId())
-                        .referenceId(loginData.getReferenceId())
-                        .build();
-
-                if (customerEntity.isEmpty()) {
-                    CustomerCreateRequest customerCreateRequest = CustomerCreateRequest.builder()
-                            .phoneNumber(phoneNumber)
-                            .sessionToken(loginData.getSessionToken())
-                            .build();
-
-                    CustomerEntity customer = customerService.createCustomer(customerCreateRequest);
-                    loginResponse.setCustomerData(customer);
-                    loginResponse.setIsCustomerDataExist(false);
-                } else {
-                    CustomerEntity customer = customerEntity.get();
-                    customer.setSessionToken(loginData.getSessionToken());
-                    customer.setIsActive(true);
-
-                    loginResponse.setCustomerData(customer);
-                    if (StringUtils.isEmpty(customer.getAddress())) {
-                        loginResponse.setIsCustomerDataExist(false);
-                    } else {
-                        loginResponse.setIsCustomerDataExist(true);
-                    }
-
-                    customerDataDao.save(customer);
-                }
-
-                log.info("Successfully, created the customer data for phoneNumber: {}", phoneNumber);
-
-                return loginResponse;
-            } else {
-                log.info("Failed to verify the user number: {}", phoneNumber);
-                throw new InvalidException("Invalid OTP Entered!");
-            }
-
-        } catch (Exception e) {
-            log.error("Received error while otp verification: {}, for phone number: {}", e.getMessage(), phoneNumber);
-            throw e;
-        }
-    }
-
-    @Override
-    @Transactional
-    public String resendOtp(String phoneNumber, AppPlatform appPlatform) {
-
-        try {
-            Optional<LoginDataEntity> currentData = loginDataDao.findActiveUserByPhoneNumber(phoneNumber, appPlatform);
-
-            if (currentData.isEmpty()) {
-                log.info("No login data found for the phone number: {}", phoneNumber);
-                throw new InvalidException("Invalid phone number!");
-            }
-
-            LoginDataEntity loginData = currentData.get();
-            loginData.setOtp(CommonUtils.GenerateOtp());
-            loginData.setOtpVerified(false);
-
-            loginDataDao.save(loginData);
-            log.info("resent otp for phone number: {}", phoneNumber);
-
-            return SUCCESS_MESSAGE;
-
-        } catch (Exception e) {
-            log.error("Received error while resend otp: {}, for phone number: {}", e.getMessage(), phoneNumber);
-            throw e;
-        }
-    }
-
-    @Override
-    @Transactional
-    public void editLoginNumber(String phoneNumber, AppPlatform appPlatform) {
-
-        try {
-            Optional<LoginDataEntity> entity = loginDataDao.findActiveUserByPhoneNumber(phoneNumber, appPlatform);
-
-            if (entity.isEmpty()) {
-                log.info("No active user found with phone number: {}", phoneNumber);
-                throw new InvalidException("Invalid Phone Number Entered!");
-            }
-
-            log.info("deletes user to edit the login number");
-            loginDataDao.deleteUserByReferenceId(entity.get().getReferenceId());
-        } catch (Exception e) {
-            log.error("Received error while resend otp: {}, for phone number: {}", e.getMessage(), phoneNumber);
-            throw e;
-        }
-    }
-
-    @Override
-    public Boolean checkExpiryOfSessionToken(String sessionToken, AppPlatform appPlatform) {
-        try {
-            Optional<LoginDataEntity> entity = loginDataDao.findLoggedInDetailBySession(sessionToken, appPlatform);
-
-            if (entity.isEmpty()) {
-                log.info("No data with this session token: {} found", sessionToken);
-                throw new InvalidException("Invalid session token!");
-            }
-
-            return entity.get().getIsExpired();
-         } catch (Exception e) {
-            log.error("Received error: {} while checking status for session token: {}", e.getMessage(), sessionToken);
-            throw e;
-        }
-    }
-
-    private String phoneNumberWithCode (String phoneNumber) {
-        return "+91" + phoneNumber;
+    private String phoneNumberWithCode(String phoneNumber) {
+        return String.format("%s%s", COUNTRY_CODE, phoneNumber);
     }
 }

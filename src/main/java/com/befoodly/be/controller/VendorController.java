@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 @CrossOrigin("*")
 public class VendorController {
 
-    @Autowired
     private final VendorService vendorService;
 
     @PostMapping(value = "/create")

@@ -1,6 +1,5 @@
 package com.befoodly.be.entity;
 
-import com.befoodly.be.model.enums.CookStatus;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -9,7 +8,9 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.SuperBuilder;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 
 @Data
 @Entity
@@ -18,34 +19,19 @@ import javax.persistence.*;
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Table(name = "cook")
-public class CookDataEntity extends BaseEntity {
+@Table(name = "customer")
+public class Customer extends BaseEntity {
+
     @Column(nullable = false, unique = true)
     String referenceId;
 
-    @Column(nullable = false)
-    String name;
+    @Column(nullable = false, unique = true)
+    String externalReferenceId;
 
-    String imgUrl;
+    String name;
 
     @Column(nullable = false)
     String phoneNumber;
 
-    @Column(nullable = false)
-    String panNumber;
-
-    Long vendorId;
-
-    String description;
-
-    Long orderCounts;
-
-    String address;
-
-    String specialities;
-
-    String feedback;
-
-    @Enumerated(EnumType.STRING)
-    CookStatus status;
+    String email;
 }

@@ -1,15 +1,13 @@
 package com.befoodly.be.service.impl;
 
 import com.befoodly.be.dao.CustomerDataDao;
-import com.befoodly.be.entity.CustomerEntity;
+import com.befoodly.be.entity.Customer;
 import com.befoodly.be.exception.throwable.InvalidException;
 import com.befoodly.be.model.request.AddressCreateRequest;
 import com.befoodly.be.model.request.CustomerCreateRequest;
 import com.befoodly.be.model.request.CustomerEditRequest;
 import com.befoodly.be.service.AddressService;
 import com.befoodly.be.service.CustomerService;
-import com.befoodly.be.utils.CommonUtils;
-import com.befoodly.be.utils.JacksonUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.ObjectUtils;
@@ -29,17 +27,13 @@ public class CustomerServiceImpl implements CustomerService {
     private final AddressService addressService;
 
     @Override
-    public CustomerEntity createCustomer(CustomerCreateRequest request) {
-
+    public Customer createCustomer(CustomerCreateRequest request) {
         try {
             String referenceId = UUID.randomUUID().toString();
-
-            CustomerEntity customer = CustomerEntity.builder()
+            Customer customer = Customer.builder()
                     .name("Foodie")
                     .referenceId(referenceId)
                     .phoneNumber(request.getPhoneNumber())
-                    .sessionToken(request.getSessionToken())
-                    .isActive(true)
                     .build();
 
             customerDataDao.save(customer);
@@ -54,10 +48,10 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public CustomerEntity editCustomerDetails(String customerReferenceId, CustomerEditRequest request) {
+    public Customer editCustomerDetails(String customerReferenceId, CustomerEditRequest request) {
 
         try {
-            CustomerEntity customer = customerDataDao.findCustomerByReferenceId(customerReferenceId);
+            Customer customer = customerDataDao.findCustomerByReferenceId(customerReferenceId);
 
             if (ObjectUtils.isEmpty(customer)) {
                 log.info("no customer found with customer id:{}", customerReferenceId);
@@ -70,7 +64,7 @@ public class CustomerServiceImpl implements CustomerService {
             }
 
             if (StringUtils.isNotEmpty(request.getEmail())) {
-                Optional<CustomerEntity> customer1 = customerDataDao.findCustomerByEmail(request.getEmail());
+                Optional<Customer> customer1 = customerDataDao.findCustomerByEmail(request.getEmail());
 
                 if (customer1.isPresent()) {
                     log.info("This email id is already registered!");
@@ -86,8 +80,6 @@ public class CustomerServiceImpl implements CustomerService {
                 if (StringUtils.isEmpty(addressCreateRequest.getPhoneNumber())) {
                     addressCreateRequest.setPhoneNumber(customer.getPhoneNumber());
                 }
-
-                customer.setAddress(CommonUtils.convertToOneLineAddress(request.getAddress()));
                 addressService.addAddress(customerReferenceId, request.getAddress());
             }
 
@@ -102,10 +94,10 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public CustomerEntity fetchCustomerDetails(String customerReferenceId) {
+    public Customer fetchCustomerDetails(String customerReferenceId) {
 
         try {
-            CustomerEntity customer = customerDataDao.findCustomerByReferenceId(customerReferenceId);
+            Customer customer = customerDataDao.findCustomerByReferenceId(customerReferenceId);
 
             if (ObjectUtils.isEmpty(customer)) {
                 log.info("no customer found with customer id:{}", customerReferenceId);

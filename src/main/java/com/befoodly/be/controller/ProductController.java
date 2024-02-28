@@ -19,7 +19,6 @@ import java.util.List;
 @CrossOrigin("*")
 public class ProductController {
 
-    @Autowired
     private final ProductService productService;
 
     @PostMapping(value = "/create")

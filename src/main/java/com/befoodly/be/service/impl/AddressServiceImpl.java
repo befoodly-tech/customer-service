@@ -1,14 +1,13 @@
 package com.befoodly.be.service.impl;
 
-import com.befoodly.be.dao.AddressDataDao;
 import com.befoodly.be.dao.CustomerDataDao;
-import com.befoodly.be.entity.AddressEntity;
-import com.befoodly.be.entity.CustomerEntity;
+import com.befoodly.be.entity.Address;
+import com.befoodly.be.entity.Customer;
 import com.befoodly.be.exception.throwable.DuplicationException;
 import com.befoodly.be.exception.throwable.InvalidException;
 import com.befoodly.be.model.request.AddressCreateRequest;
+import com.befoodly.be.repository.AddressRepository;
 import com.befoodly.be.service.AddressService;
-import com.befoodly.be.utils.CommonUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.ObjectUtils;
@@ -25,21 +24,20 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class AddressServiceImpl implements AddressService {
 
-    private final AddressDataDao addressDataDao;
-
+    private final AddressRepository addressRepository;
     private final CustomerDataDao customerDataDao;
 
     private static String phoneNumber;
 
     @Override
-    public AddressEntity addAddress(String customerReferenceId, AddressCreateRequest request) {
+    public Address addAddress(String customerReferenceId, AddressCreateRequest request) {
 
         try {
 
             if (isCustomerExist(customerReferenceId)) {
-                List<AddressEntity> addressData = addressDataDao.findAddressByCustomerId(customerReferenceId);
+                List<Address> addressData = addressRepository.findByCustomerReferenceId(customerReferenceId);
 
-                AddressEntity newAddress = AddressEntity.builder()
+                Address newAddress = Address.builder()
                         .referenceId(UUID.randomUUID().toString())
                         .customerReferenceId(customerReferenceId)
                         .title(request.getTitle())
@@ -51,12 +49,12 @@ public class AddressServiceImpl implements AddressService {
                         .state(request.getState())
                         .build();
 
-                Optional<AddressEntity> existingAddress = addressData.stream()
+                Optional<Address> existingAddress = addressData.stream()
                         .filter(address -> address.getTitle().equals(request.getTitle()))
                         .findFirst();
 
                 if (existingAddress.isEmpty()) {
-                    addressDataDao.save(newAddress);
+                    addressRepository.save(newAddress);
                     log.info("saved the new address for customer id: {}", customerReferenceId);
 
                     return newAddress;
@@ -75,13 +73,12 @@ public class AddressServiceImpl implements AddressService {
 
     @Override
     @Transactional
-    public AddressEntity editAddress(String customerReferenceId, String title, AddressCreateRequest request) {
-
+    public Address editAddress(String customerReferenceId, String title, AddressCreateRequest request) {
         try {
-            CustomerEntity customer = customerDataDao.findCustomerByReferenceId(customerReferenceId);
+            Customer customer = customerDataDao.findCustomerByReferenceId(customerReferenceId);
 
             if (ObjectUtils.isNotEmpty(customer)) {
-                Optional<AddressEntity> address = addressDataDao.findAddressByCustomerIdAndTitle(customerReferenceId, title);
+                Optional<Address> address = addressRepository.findByCustomerReferenceIdAndTitle(customerReferenceId, title);
 
                 if (address.isEmpty()) {
                     log.info("Address not found for title: {}, customerId: {}", title, customerReferenceId);
@@ -89,7 +86,7 @@ public class AddressServiceImpl implements AddressService {
                     throw new InvalidException("Address with title not found for customer!");
                 }
 
-                AddressEntity currentAddress = address.get();
+                Address currentAddress = address.get();
                 currentAddress.setTitle(request.getTitle());
                 currentAddress.setAddressFirst(request.getAddressFirst());
                 currentAddress.setAddressSecond(request.getAddressSecond());
@@ -97,9 +94,9 @@ public class AddressServiceImpl implements AddressService {
                 currentAddress.setCity(request.getCity());
                 currentAddress.setState(request.getState());
 
-                customer.setAddress(CommonUtils.convertToOneLineAddress(request));
+//                customer.setAddress(CommonUtils.convertToOneLineAddress(request));
 
-                addressDataDao.save(currentAddress);
+                addressRepository.save(currentAddress);
                 customerDataDao.save(customer);
                 log.info("successfully updated the address for customerId:{}", customerReferenceId);
 
@@ -119,7 +116,7 @@ public class AddressServiceImpl implements AddressService {
     public void deleteAddress(String customerReferenceId, String title) {
         try {
             if (isCustomerExist(customerReferenceId)) {
-                addressDataDao.deleteAddress(customerReferenceId, title);
+                addressRepository.deleteByCustomerReferenceIdAndTitle(customerReferenceId, title);
                 log.info("successfully deleted the address with title: {} for customer Id:{}", title, customerReferenceId);
 
                 return;
@@ -133,17 +130,17 @@ public class AddressServiceImpl implements AddressService {
     }
 
     @Override
-    public List<AddressEntity> fetchAddressList(String customerReferenceId) {
+    public List<Address> fetchAddressList(String customerReferenceId) {
         try {
-            List<AddressEntity> addressEntityList = addressDataDao.findAddressByCustomerId(customerReferenceId);
+            List<Address> addressList = addressRepository.findByCustomerReferenceId(customerReferenceId);
 
-            if (addressEntityList.isEmpty()) {
+            if (addressList.isEmpty()) {
                 log.info("No Address Data present for customerId: {}", customerReferenceId);
                 throw new InvalidException("No Address Data Present!");
             }
 
             log.info("Fetched the list of address data for customer: {}", customerReferenceId);
-            return addressEntityList;
+            return addressList;
         } catch (Exception e) {
             log.error("Failed to fetch the list of addresses for customer id: {}, error: {}", customerReferenceId, e.getMessage());
             throw e;
@@ -151,7 +148,7 @@ public class AddressServiceImpl implements AddressService {
     }
 
     private Boolean isCustomerExist(String customerReferenceId) {
-        CustomerEntity customer = customerDataDao.findCustomerByReferenceId(customerReferenceId);
+        Customer customer = customerDataDao.findCustomerByReferenceId(customerReferenceId);
 
         if (ObjectUtils.isEmpty(customer)) {
             return false;

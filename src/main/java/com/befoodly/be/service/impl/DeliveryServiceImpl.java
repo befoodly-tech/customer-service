@@ -2,7 +2,7 @@ package com.befoodly.be.service.impl;
 
 import com.befoodly.be.dao.AddressDataDao;
 import com.befoodly.be.dao.DeliveryDataDao;
-import com.befoodly.be.entity.AddressEntity;
+import com.befoodly.be.entity.Address;
 import com.befoodly.be.entity.DeliveryBoyEntity;
 import com.befoodly.be.entity.DeliveryEntity;
 import com.befoodly.be.exception.throwable.InvalidException;
@@ -10,6 +10,7 @@ import com.befoodly.be.model.DeliveryManData;
 import com.befoodly.be.model.TimeSlot;
 import com.befoodly.be.model.constant.TimeSlotConstants;
 import com.befoodly.be.model.response.DeliveryResponse;
+import com.befoodly.be.repository.AddressRepository;
 import com.befoodly.be.service.DeliveryBoyService;
 import com.befoodly.be.service.DeliveryService;
 import lombok.RequiredArgsConstructor;
@@ -113,7 +114,7 @@ public class DeliveryServiceImpl implements DeliveryService {
     }
 
     private DeliveryResponse mapDeliveryEntityToDeliveryResponse(DeliveryEntity deliveryEntity) {
-        Optional<AddressEntity> addressEntity = addressDataDao.findAddressById(deliveryEntity.getAddressId());
+        Optional<Address> addressEntity = addressDataDao.findAddressById(deliveryEntity.getAddressId());
         DeliveryBoyEntity deliveryBoy = deliveryBoyService.fetchAvailableDeliveryBoy();
 
         return DeliveryResponse.builder()

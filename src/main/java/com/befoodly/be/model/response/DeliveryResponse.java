@@ -1,6 +1,6 @@
 package com.befoodly.be.model.response;
 
-import com.befoodly.be.entity.AddressEntity;
+import com.befoodly.be.entity.Address;
 import com.befoodly.be.model.DeliveryManData;
 import com.befoodly.be.model.enums.DeliveryStatus;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -20,7 +20,7 @@ public class DeliveryResponse {
     Double deliveryCost;
     DeliveryStatus status;
     DeliveryManData deliveryManData;
-    AddressEntity deliveryAddress;
+    Address deliveryAddress;
     LocalDateTime deliveryTime;
     LocalDateTime orderTime;
     String description;
